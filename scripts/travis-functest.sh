@@ -11,13 +11,13 @@ export KUBE_VERSION=$1
 kube_version() {
     echo "${KUBE_VERSION}" | sed 's/^v//' | cut -d'.' -f"${1}"
 }
-sudo scripts/minikube.sh up
-sudo scripts/minikube.sh deploy-rook
-sudo scripts/minikube.sh create-block-pool
+scripts/minikube.sh up
+scripts/minikube.sh deploy-rook
+scripts/minikube.sh create-block-pool
 # pull docker images to speed up e2e
-sudo scripts/minikube.sh cephcsi
-sudo scripts/minikube.sh k8s-sidecar
-sudo chown -R travis: "$HOME"/.minikube /usr/local/bin/kubectl
+scripts/minikube.sh cephcsi
+scripts/minikube.sh k8s-sidecar
+chown -R travis: "$HOME"/.minikube /usr/local/bin/kubectl
 KUBE_MAJOR=$(kube_version 1)
 KUBE_MINOR=$(kube_version 2)
 # skip snapshot operation if kube version is less than 1.17.0
@@ -35,4 +35,4 @@ if [[ "${KUBE_MAJOR}" -ge 1 ]] && [[ "${KUBE_MINOR}" -ge 17 ]]; then
     # delete snapshot CRD
     scripts/install-snapshot.sh cleanup
 fi
-sudo scripts/minikube.sh clean
+scripts/minikube.sh clean
