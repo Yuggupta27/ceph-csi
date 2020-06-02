@@ -110,6 +110,9 @@ function check_rbd_stat() {
 			RBD_POOL_NAME=$1
 		fi
 		echo "Checking RBD ($RBD_POOL_NAME) stats... ${retry}s" && sleep 5
+		echo "Printing Operator logs"
+		rooktest="$(kubectl get pods --no-headers -o custom-columns=":metadata.name" -n rook-ceph | grep rook-ceph-operator)"
+		kubectl logs ${rooktest} -n rook-ceph
 
 		TOOLBOX_POD=$(kubectl -n rook-ceph get pods -l app=rook-ceph-tools -o jsonpath='{.items[0].metadata.name}')
 		TOOLBOX_POD_STATUS=$(kubectl -n rook-ceph get pod "$TOOLBOX_POD" -ojsonpath='{.status.phase}')
