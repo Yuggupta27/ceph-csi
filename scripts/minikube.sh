@@ -78,21 +78,10 @@ fi
 K8S_FEATURE_GATES=${K8S_FEATURE_GATES:-"BlockVolume=true,CSIBlockVolume=true,VolumeSnapshotDataSource=true,ExpandCSIVolumes=true"}
 
 #extra-config for kube https://minikube.sigs.k8s.io/docs/reference/configuration/kubernetes/
-EXTRA_CONFIG=${EXTRA_CONFIG:-"--extra-config=apiserver.enable-admission-plugins=PodSecurityPolicy /
-			      --extra-config=kubelet.pod-cidr=192.168.123.0/24  /
-			      --extra-config=kubelet.service-cidr=192.168.123.0/24"}
-
-# kubelet.resolv-conf needs to point to a file, not a symlink
-# the default minikube VM has /etc/resolv.conf -> /run/systemd/resolve/resolv.conf
-RESOLV_CONF='/run/systemd/resolve/resolv.conf'
-if [[ "${VM_DRIVER}" == "none" ]] && [[ ! -e "${RESOLV_CONF}" ]]; then
-	# in case /run/systemd/resolve/resolv.conf does not exist, use the
-	# standard /etc/resolv.conf (with symlink resolved)
-	RESOLV_CONF="$(readlink -f /etc/resolv.conf)"
-fi
-# TODO: this might overload --extra-config=kubelet.resolv-conf in case the
-# caller did set EXTRA_CONFIG in the environment
-EXTRA_CONFIG="${EXTRA_CONFIG} --extra-config=kubelet.resolv-conf=${RESOLV_CONF}"
+EXTRA_CONFIG=${EXTRA_CONFIG:-"--extra-config=apiserver.enable-admission-plugins=PodSecurityPolicy \
+  --extra-config=kubelet.resolv-conf=/run/systemd/resolve/resolv.conf \
+  --extra-config=kubelet.pod-cidr=172.16.0.0/14 \
+  --extra-config=kubelet.service-cidr=172.20.0.0/14"}
 
 #extra Rook configuration
 ROOK_BLOCK_POOL_NAME=${ROOK_BLOCK_POOL_NAME:-"newrbdpool"}
@@ -110,7 +99,7 @@ up)
 
     echo "starting minikube with kubeadm bootstrapper"
     # shellcheck disable=SC2086
-    minikube start --memory="${MEMORY}" -b kubeadm --kubernetes-version="${KUBE_VERSION}" --vm-driver="${VM_DRIVER}" --service-cluster-ip-range="192.168.123.0/24" --feature-gates="${K8S_FEATURE_GATES}" ${EXTRA_CONFIG}
+    minikube start --memory="${MEMORY}" -b kubeadm --kubernetes-version="${KUBE_VERSION}" --vm-driver="${VM_DRIVER}" --feature-gates="${K8S_FEATURE_GATES}" --service-cluster-ip-range="192.168.123.0/24" ${EXTRA_CONFIG}
 
     # create a link so the default dataDirHostPath will work for this
     # environment
