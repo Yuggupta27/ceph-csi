@@ -79,9 +79,7 @@ K8S_FEATURE_GATES=${K8S_FEATURE_GATES:-"BlockVolume=true,CSIBlockVolume=true,Vol
 
 #extra-config for kube https://minikube.sigs.k8s.io/docs/reference/configuration/kubernetes/
 EXTRA_CONFIG=${EXTRA_CONFIG:-"--extra-config=apiserver.enable-admission-plugins=PodSecurityPolicy \
-  --extra-config=kubelet.resolv-conf=/run/systemd/resolve/resolv.conf \
-  --extra-config=kubelet.pod-cidr=172.16.0.0/14 \
-  --extra-config=kubelet.service-cidr=172.20.0.0/14"}
+  --extra-config=kubelet.resolv-conf=/run/systemd/resolve/resolv.conf"}
 
 #extra Rook configuration
 ROOK_BLOCK_POOL_NAME=${ROOK_BLOCK_POOL_NAME:-"newrbdpool"}
