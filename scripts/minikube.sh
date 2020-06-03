@@ -97,7 +97,7 @@ up)
 
     echo "starting minikube with kubeadm bootstrapper"
     # shellcheck disable=SC2086
-    minikube start --memory="${MEMORY}" -b kubeadm --kubernetes-version="${KUBE_VERSION}" --vm-driver="${VM_DRIVER}" --feature-gates="${K8S_FEATURE_GATES}" --service-cluster-ip-range="192.168.123.0/24" --cluster-cidr="192.168.123.0/24" ${EXTRA_CONFIG}
+    minikube start --memory="${MEMORY}" -b kubeadm --kubernetes-version="${KUBE_VERSION}" --vm-driver="${VM_DRIVER}" --feature-gates="${K8S_FEATURE_GATES}" --service-cluster-ip-range="192.168.123.0/24" ${EXTRA_CONFIG}
 
     # create a link so the default dataDirHostPath will work for this
     # environment
