@@ -78,7 +78,9 @@ fi
 K8S_FEATURE_GATES=${K8S_FEATURE_GATES:-"BlockVolume=true,CSIBlockVolume=true,VolumeSnapshotDataSource=true,ExpandCSIVolumes=true"}
 
 #extra-config for kube https://minikube.sigs.k8s.io/docs/reference/configuration/kubernetes/
-EXTRA_CONFIG=${EXTRA_CONFIG:-"--extra-config=apiserver.enable-admission-plugins=PodSecurityPolicy"}
+EXTRA_CONFIG=${EXTRA_CONFIG:-"--extra-config=apiserver.enable-admission-plugins=PodSecurityPolicy /
+			      --extra-config=kubelet.pod-cidr=192.168.123.0/24  /
+			      --extra-config=kubelet.service-cidr=192.168.123.0/24"}
 
 # kubelet.resolv-conf needs to point to a file, not a symlink
 # the default minikube VM has /etc/resolv.conf -> /run/systemd/resolve/resolv.conf
@@ -108,7 +110,7 @@ up)
 
     echo "starting minikube with kubeadm bootstrapper"
     # shellcheck disable=SC2086
-    minikube start --memory="${MEMORY}" -b kubeadm --kubernetes-version="${KUBE_VERSION}" --vm-driver="${VM_DRIVER}" --feature-gates="${K8S_FEATURE_GATES}" ${EXTRA_CONFIG}
+    minikube start --memory="${MEMORY}" -b kubeadm --kubernetes-version="${KUBE_VERSION}" --vm-driver="${VM_DRIVER}" --service-cluster-ip-range="192.168.123.0/24" --feature-gates="${K8S_FEATURE_GATES}" ${EXTRA_CONFIG}
 
     # create a link so the default dataDirHostPath will work for this
     # environment
