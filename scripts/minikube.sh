@@ -79,8 +79,7 @@ K8S_FEATURE_GATES=${K8S_FEATURE_GATES:-"BlockVolume=true,CSIBlockVolume=true,Vol
 
 #extra-config for kube https://minikube.sigs.k8s.io/docs/reference/configuration/kubernetes/
 EXTRA_CONFIG=${EXTRA_CONFIG:-"--extra-config=apiserver.enable-admission-plugins=PodSecurityPolicy \
-  --extra-config=kubelet.resolv-conf=/run/systemd/resolve/resolv.conf \
-  --extra-config=apiserver.ServiceClusterIPRange=192.168.123.0/24"}
+  --extra-config=kubelet.resolv-conf=/run/systemd/resolve/resolv.conf"}
 
 #extra Rook configuration
 ROOK_BLOCK_POOL_NAME=${ROOK_BLOCK_POOL_NAME:-"newrbdpool"}
@@ -98,7 +97,7 @@ up)
 
     echo "starting minikube with kubeadm bootstrapper"
     # shellcheck disable=SC2086
-    minikube start --memory="${MEMORY}" -b kubeadm --kubernetes-version="${KUBE_VERSION}" --vm-driver="${VM_DRIVER}" --feature-gates="${K8S_FEATURE_GATES}" ${EXTRA_CONFIG}
+    minikube start --memory="${MEMORY}" -b kubeadm --kubernetes-version="${KUBE_VERSION}" --vm-driver="${VM_DRIVER}" --feature-gates="${K8S_FEATURE_GATES}" --service-cluster-ip-range="192.168.123.0/24" ${EXTRA_CONFIG}
 
     # create a link so the default dataDirHostPath will work for this
     # environment
