@@ -78,7 +78,8 @@ fi
 K8S_FEATURE_GATES=${K8S_FEATURE_GATES:-"BlockVolume=true,CSIBlockVolume=true,VolumeSnapshotDataSource=true,ExpandCSIVolumes=true"}
 
 #extra-config for kube https://minikube.sigs.k8s.io/docs/reference/configuration/kubernetes/
-EXTRA_CONFIG=${EXTRA_CONFIG:-"--extra-config=apiserver.enable-admission-plugins=PodSecurityPolicy"}
+EXTRA_CONFIG=${EXTRA_CONFIG:-"--extra-config=apiserver.enable-admission-plugins=PodSecurityPolicy \
+			--extra-config=kubeadm.pod-network-cidr=192.168.123.0/24"}
 
 # kubelet.resolv-conf needs to point to a file, not a symlink
 # the default minikube VM has /etc/resolv.conf -> /run/systemd/resolve/resolv.conf
