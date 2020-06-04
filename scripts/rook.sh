@@ -71,6 +71,7 @@ function check_ceph_cluster_health() {
 
 	if [ "$retry" -gt "$ROOK_DEPLOY_TIMEOUT" ]; then
 		kubectl get pods -n rook-ceph
+		kubectl -n rook-ceph describe pod -l app=rook-ceph-operator
 		echo "Printing Operator logs"
 		rooktest="$(kubectl get pods --no-headers -o custom-columns=":metadata.name" -n rook-ceph | grep rook-ceph-operator)"
 		kubectl logs ${rooktest} -n rook-ceph -p
