@@ -11,13 +11,25 @@ export KUBE_VERSION=$1
 kube_version() {
     echo "${KUBE_VERSION}" | sed 's/^v//' | cut -d'.' -f"${1}"
 }
-scripts/minikube.sh up
-scripts/minikube.sh deploy-rook
-scripts/minikube.sh create-block-pool
+
+# when running as root, "sudo" is not needed and will break the environment
+SUDO='sudo'
+if [[ "$(id -u)" == "0" ]]; then
+       SUDO=''
+fi
+
+${SUDO} scripts/minikube.sh up
+${SUDO} scripts/minikube.sh deploy-rook
+${SUDO} scripts/minikube.sh create-block-pool
 # pull docker images to speed up e2e
-scripts/minikube.sh cephcsi
-scripts/minikube.sh k8s-sidecar
-chown -R travis: "$HOME"/.minikube /usr/local/bin/kubectl
+${SUDO} scripts/minikube.sh cephcsi
+${SUDO} scripts/minikube.sh k8s-sidecar
+
+# in case we run as non-root, give the user permissions to run kubectl
+if [[ -n "${SUDO}" ]]; then
+       ${SUDO} chown -R "$(id -u)": "$HOME"/.minikube /usr/local/bin/kubectl
+fi
+
 KUBE_MAJOR=$(kube_version 1)
 KUBE_MINOR=$(kube_version 2)
 # skip snapshot operation if kube version is less than 1.17.0
@@ -29,10 +41,18 @@ if [[ "${KUBE_MAJOR}" -ge 1 ]] && [[ "${KUBE_MINOR}" -ge 17 ]]; then
 fi
 
 # functional tests
-go test github.com/ceph/ceph-csi/e2e --deploy-timeout=10 -timeout=30m --cephcsi-namespace=cephcsi-e2e-$RANDOM -v -mod=vendor
+if [[ -e e2e.test ]]; then
+       # e2e.test has references to the relative ../deploy/ files, it needs to
+       # run from within the e2e/ directory
+       pushd e2e
+       ../e2e.test --deploy-timeout=10 -test.timeout=30m --cephcsi-namespace=cephcsi-e2e-$RANDOM -test.v
+       popd
+else
+       go test github.com/ceph/ceph-csi/e2e --deploy-timeout=10 -timeout=30m --cephcsi-namespace=cephcsi-e2e-$RANDOM -v -mod=vendor
+fi
 
 if [[ "${KUBE_MAJOR}" -ge 1 ]] && [[ "${KUBE_MINOR}" -ge 17 ]]; then
     # delete snapshot CRD
     scripts/install-snapshot.sh cleanup
 fi
-scripts/minikube.sh clean
+${SUDO} scripts/minikube.sh clean
