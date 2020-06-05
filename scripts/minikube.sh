@@ -59,6 +59,17 @@ function enable_psp() {
 	  cp "$DIR"/psp.yaml "$HOME"/.minikube/files/etc/kubernetes/addons/psp.yaml
 }
 
+function prepare_minikube() {
+    if [[ "${VM_DRIVER}" == 'none' ]]; then
+        # minikube does not play nicely with SElinux
+        selinuxenabled 2>/dev/null && setenforce 0
+        # bridges should use iptables
+        sysctl -w net.bridge.bridge-nf-call-iptables=1
+        # disable swap as kubelet may not like it
+        swapoff -a
+    fi
+}
+
 # configure minikube
 MINIKUBE_ARCH=${MINIKUBE_ARCH:-"amd64"}
 MINIKUBE_VERSION=${MINIKUBE_VERSION:-"latest"}
@@ -73,13 +84,14 @@ if [[ "${VM_DRIVER}" == "kvm2" ]]; then
     # use vda1 instead of sda1 when running with the libvirt driver
     DISK="vda1"
 fi
+# alternative network to use for the pods (like '192.168.123.0/24')
+POD_NW_CIDR=''
 
 #feature-gates for kube
 K8S_FEATURE_GATES=${K8S_FEATURE_GATES:-"BlockVolume=true,CSIBlockVolume=true,VolumeSnapshotDataSource=true,ExpandCSIVolumes=true"}
 
 #extra-config for kube https://minikube.sigs.k8s.io/docs/reference/configuration/kubernetes/
-EXTRA_CONFIG=${EXTRA_CONFIG:-"--extra-config=apiserver.enable-admission-plugins=PodSecurityPolicy \
-			--extra-config=kubeadm.pod-network-cidr=192.168.123.0/24"}
+EXTRA_CONFIG=${EXTRA_CONFIG:-"--extra-config=apiserver.enable-admission-plugins=PodSecurityPolicy"}
 
 # kubelet.resolv-conf needs to point to a file, not a symlink
 # the default minikube VM has /etc/resolv.conf -> /run/systemd/resolve/resolv.conf
@@ -92,6 +104,10 @@ fi
 # TODO: this might overload --extra-config=kubelet.resolv-conf in case the
 # caller did set EXTRA_CONFIG in the environment
 EXTRA_CONFIG="${EXTRA_CONFIG} --extra-config=kubelet.resolv-conf=${RESOLV_CONF}"
+
+if [[ -n "${POD_NETWORK}" ]]; then
+	EXTRA_CONFIG="${EXTRA_CONFIG} --service-cluster-ip-range=${POD_NW_CIDR}"
+fi
 
 #extra Rook configuration
 ROOK_BLOCK_POOL_NAME=${ROOK_BLOCK_POOL_NAME:-"newrbdpool"}
@@ -106,6 +122,7 @@ up)
     fi
 
     enable_psp
+    prepare_minikube
 
     echo "starting minikube with kubeadm bootstrapper"
     # shellcheck disable=SC2086
