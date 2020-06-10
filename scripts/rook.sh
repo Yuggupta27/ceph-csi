@@ -73,7 +73,8 @@ function check_ceph_cluster_health() {
 		kubectl get pods -n rook-ceph
 		kubectl -n rook-ceph describe pod -l app=rook-ceph-operator
  		echo "Printing Operator logs"
- 		rooktest="$(kubectl get pods --no-headers -o custom-columns=":metadata.name" -n rook-ceph | grep rook-ceph-operator)" 		kubectl logs ${rooktest} -n rook-ceph -p
+ 		rooktest="$(kubectl get pods --no-headers -o custom-columns=":metadata.name" -n rook-ceph | grep rook-ceph-operator)" 		
+		kubectl logs ${rooktest} -n rook-ceph -p
 		echo "[Timeout] CEPH cluster not in a healthy state (timeout)"
 # 		kubectl describe pods ${rooktest} -n rook-ceph
 		exit 1
