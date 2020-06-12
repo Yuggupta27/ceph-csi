@@ -87,7 +87,7 @@ function check_ceph_cluster_health() {
 		kubectl logs -l app=csi-cephfsplugin-provisioner -n rook-ceph -c csi-cephfsplugin
 		echo "////////////////////////////////////////////////////////////////////"
 		echo "Printing liveness-prometheus logs"
-		kubectl logs -l app=csi-cephfsplugin-provisioner -n rook-ceph -c csi-cephfspluginliveness-prometheus
+		kubectl logs -l app=csi-cephfsplugin-provisioner -n rook-ceph -c liveness-prometheus
 		echo "[Timeout] CEPH cluster not in a healthy state (timeout)"
 # 		kubectl describe pods ${rooktest} -n rook-ceph
 		exit 1
