@@ -71,10 +71,23 @@ function check_ceph_cluster_health() {
 
 	if [ "$retry" -gt "$ROOK_DEPLOY_TIMEOUT" ]; then
 		kubectl get pods -n rook-ceph
+		kubectl describe pod -l app=csi-cephfsplugin-provisioner -n rook-ceph
 		kubectl -n rook-ceph describe pod -l app=rook-ceph-operator
  		echo "Printing Operator logs"
  		rooktest="$(kubectl get pods --no-headers -o custom-columns=":metadata.name" -n rook-ceph | grep rook-ceph-operator)" 		
 		kubectl logs ${rooktest} -n rook-ceph -p
+		echo "////////////////////////////////////////////////////////////////////"
+		echo "Printing csi-attacher logs"
+		kubectl logs -l app=csi-cephfsplugin-provisioner -n rook-ceph -c csi-attacher
+		echo "////////////////////////////////////////////////////////////////////"
+		echo "Printing csi-provisioner logs"
+		kubectl logs -l app=csi-cephfsplugin-provisioner -n rook-ceph -c csi-provisioner
+		echo "////////////////////////////////////////////////////////////////////"
+		echo "Printing csi-cephfsplugin logs"
+		kubectl logs -l app=csi-cephfsplugin-provisioner -n rook-ceph -c csi-cephfsplugin
+		echo "////////////////////////////////////////////////////////////////////"
+		echo "Printing liveness-prometheus logs"
+		kubectl logs -l app=csi-cephfsplugin-provisioner -n rook-ceph -c csi-cephfspluginliveness-prometheus
 		echo "[Timeout] CEPH cluster not in a healthy state (timeout)"
 # 		kubectl describe pods ${rooktest} -n rook-ceph
 		exit 1
