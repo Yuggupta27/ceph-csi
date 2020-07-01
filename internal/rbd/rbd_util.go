@@ -192,7 +192,7 @@ func createImage(ctx context.Context, pOpts *rbdVolume, cr *util.Credentials) er
 			return errors.Wrapf(err, "failed to set data pool")
 		}
 	}
-	klog.V(4).Infof(util.Log(ctx, logMsg),
+	klog.V(4).Infof(util.Log(ctx, logMsg), // nolint:gomnd // number specifies log level
 		pOpts, volSzMiB, pOpts.imageFeatureSet.Names(), pOpts.Monitors)
 
 	if pOpts.imageFeatureSet != 0 {
@@ -283,7 +283,7 @@ func rbdStatus(ctx context.Context, pOpts *rbdVolume, cr *util.Credentials) (boo
 	var output string
 	var cmd []byte
 
-	klog.V(4).Infof(util.Log(ctx, "rbd: status %s using mon %s"), pOpts, pOpts.Monitors)
+	klog.V(4).Infof(util.Log(ctx, "rbd: status %s using mon %s"), pOpts, pOpts.Monitors) // nolint:gomnd // number specifies log level
 	args := []string{"status", pOpts.String(), "-m", pOpts.Monitors, "--id", cr.ID, "--keyfile=" + cr.KeyFile}
 	cmd, err := execCommand("rbd", args)
 	output = string(cmd)
@@ -302,7 +302,7 @@ func rbdStatus(ctx context.Context, pOpts *rbdVolume, cr *util.Credentials) (boo
 	}
 
 	if strings.Contains(output, imageWatcherStr) {
-		klog.V(4).Infof(util.Log(ctx, "rbd: watchers on %s: %s"), pOpts, output)
+		klog.V(4).Infof(util.Log(ctx, "rbd: watchers on %s: %s"), pOpts, output) // nolint:gomnd // number specifies log level
 		return true, output, nil
 	}
 	klog.Warningf(util.Log(ctx, "rbd: no watchers on %s"), pOpts)
@@ -316,7 +316,7 @@ func addRbdManagerTask(ctx context.Context, pOpts *rbdVolume, arg []string) (boo
 	var output []byte
 	args := []string{"rbd", "task", "add"}
 	args = append(args, arg...)
-	klog.V(4).Infof(util.Log(ctx, "executing %v for image (%s) using mon %s, pool %s"), args, pOpts.RbdImageName, pOpts.Monitors, pOpts.Pool)
+	klog.V(4).Infof(util.Log(ctx, "executing %v for image (%s) using mon %s, pool %s"), args, pOpts.RbdImageName, pOpts.Monitors, pOpts.Pool) // nolint:gomnd // number specifies log level
 	supported := true
 	output, err := execCommand("ceph", args)
 
@@ -358,7 +358,7 @@ func deleteImage(ctx context.Context, pOpts *rbdVolume, cr *util.Credentials) er
 		return err
 	}
 
-	klog.V(4).Infof(util.Log(ctx, "rbd: delete %s using mon %s, pool %s"), image, pOpts.Monitors, pOpts.Pool)
+	klog.V(4).Infof(util.Log(ctx, "rbd: delete %s using mon %s, pool %s"), image, pOpts.Monitors, pOpts.Pool) // nolint:gomnd // number specifies log level
 
 	err = pOpts.openIoctx()
 	if err != nil {
@@ -684,7 +684,8 @@ func isLegacyVolumeID(volumeID string) bool {
 	//    length: 12 ("csi-rbd-vol-") + 36 (UUID string)
 
 	// length check
-	if len(volumeID) != 48 {
+	const expectedVolIDlen = 48
+	if len(volumeID) != expectedVolIDlen {
 		return false
 	}
 
@@ -782,7 +783,7 @@ func genVolFromVolumeOptions(ctx context.Context, volOptions, credentials map[st
 		rbdVol.imageFeatureSet = librbd.FeatureSetFromNames(arr)
 	}
 
-	klog.V(3).Infof(util.Log(ctx, "setting disableInUseChecks on rbd volume to: %v"), disableInUseChecks)
+	klog.V(3).Infof(util.Log(ctx, "setting disableInUseChecks on rbd volume to: %v"), disableInUseChecks) // nolint:gomnd // number specifies log level
 	rbdVol.DisableInUseChecks = disableInUseChecks
 
 	rbdVol.Mounter, ok = volOptions["mounter"]
@@ -839,7 +840,7 @@ func (rv *rbdVolume) hasSnapshotFeature() bool {
 }
 
 func (rv *rbdVolume) createSnapshot(ctx context.Context, pOpts *rbdSnapshot) error {
-	klog.V(4).Infof(util.Log(ctx, "rbd: snap create %s using mon %s"), pOpts, pOpts.Monitors)
+	klog.V(4).Infof(util.Log(ctx, "rbd: snap create %s using mon %s"), pOpts, pOpts.Monitors) // nolint:gomnd // number specifies log level
 	image, err := rv.open()
 	if err != nil {
 		return err
@@ -851,7 +852,7 @@ func (rv *rbdVolume) createSnapshot(ctx context.Context, pOpts *rbdSnapshot) err
 }
 
 func (rv *rbdVolume) deleteSnapshot(ctx context.Context, pOpts *rbdSnapshot) error {
-	klog.V(4).Infof(util.Log(ctx, "rbd: snap rm %s using mon %s"), pOpts, pOpts.Monitors)
+	klog.V(4).Infof(util.Log(ctx, "rbd: snap rm %s using mon %s"), pOpts, pOpts.Monitors) // nolint:gomnd // number specifies log level
 	image, err := rv.open()
 	if err != nil {
 		return err
@@ -872,7 +873,7 @@ func (rv *rbdVolume) deleteSnapshot(ctx context.Context, pOpts *rbdSnapshot) err
 func (rv *rbdVolume) cloneRbdImageFromSnapshot(ctx context.Context, pSnapOpts *rbdSnapshot) error {
 	image := rv.RbdImageName
 	var err error
-	klog.V(4).Infof(util.Log(ctx, "rbd: clone %s %s using mon %s"), pSnapOpts, image, rv.Monitors)
+	klog.V(4).Infof(util.Log(ctx, "rbd: clone %s %s using mon %s"), pSnapOpts, image, rv.Monitors) // nolint:gomnd // number specifies log level
 
 	options := librbd.NewRbdImageOptions()
 	defer options.Destroy()
@@ -1033,8 +1034,9 @@ func (ri *rbdImageMetadataStash) String() string {
 // stashRBDImageMetadata stashes required fields into the stashFileName at the passed in path, in
 // JSON format.
 func stashRBDImageMetadata(volOptions *rbdVolume, path string) error {
+	const version = 2
 	var imgMeta = rbdImageMetadataStash{
-		Version:   2, // there are no checks for this at present
+		Version:   version, // there are no checks for this at present
 		Pool:      volOptions.Pool,
 		ImageName: volOptions.RbdImageName,
 		Encrypted: volOptions.Encrypted,
@@ -1137,7 +1139,7 @@ func (rv *rbdVolume) checkRbdImageEncrypted(ctx context.Context) (string, error)
 	}
 
 	encrypted := strings.TrimSpace(value)
-	klog.V(4).Infof(util.Log(ctx, "image %s encrypted state metadata reports %q"), rv, encrypted)
+	klog.V(4).Infof(util.Log(ctx, "image %s encrypted state metadata reports %q"), rv, encrypted) // nolint:gomnd // number specifies log level
 	return encrypted, nil
 }
 

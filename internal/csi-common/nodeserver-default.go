@@ -54,7 +54,7 @@ func (ns *DefaultNodeServer) NodeExpandVolume(ctx context.Context, req *csi.Node
 
 // NodeGetInfo returns node ID.
 func (ns *DefaultNodeServer) NodeGetInfo(ctx context.Context, req *csi.NodeGetInfoRequest) (*csi.NodeGetInfoResponse, error) {
-	klog.V(5).Infof(util.Log(ctx, "Using default NodeGetInfo"))
+	klog.V(5).Infof(util.Log(ctx, "Using default NodeGetInfo")) // nolint:gomnd // number specifies log level
 
 	csiTopology := &csi.Topology{
 		Segments: ns.Driver.topology,
@@ -68,7 +68,7 @@ func (ns *DefaultNodeServer) NodeGetInfo(ctx context.Context, req *csi.NodeGetIn
 
 // NodeGetCapabilities returns RPC unknow capability.
 func (ns *DefaultNodeServer) NodeGetCapabilities(ctx context.Context, req *csi.NodeGetCapabilitiesRequest) (*csi.NodeGetCapabilitiesResponse, error) {
-	klog.V(5).Infof(util.Log(ctx, "Using default NodeGetCapabilities"))
+	klog.V(5).Infof(util.Log(ctx, "Using default NodeGetCapabilities")) // nolint:gomnd // number specifies log level
 
 	return &csi.NodeGetCapabilitiesResponse{
 		Capabilities: []*csi.NodeServiceCapability{

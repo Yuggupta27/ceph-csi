@@ -45,7 +45,7 @@ func execCommand(ctx context.Context, program string, args ...string) (stdout, s
 	cmd.Stdout = &stdoutBuf
 	cmd.Stderr = &stderrBuf
 
-	klog.V(4).Infof(util.Log(ctx, "cephfs: EXEC %s %s"), program, sanitizedArgs)
+	klog.V(4).Infof(util.Log(ctx, "cephfs: EXEC %s %s"), program, sanitizedArgs) // nolint:gomnd // number specifies log level
 
 	if err := cmd.Run(); err != nil {
 		if cmd.Process == nil {

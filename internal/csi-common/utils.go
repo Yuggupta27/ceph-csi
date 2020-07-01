@@ -156,13 +156,13 @@ func contextIDInjector(ctx context.Context, req interface{}, info *grpc.UnarySer
 }
 
 func logGRPC(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-	klog.V(3).Infof(util.Log(ctx, "GRPC call: %s"), info.FullMethod)
-	klog.V(5).Infof(util.Log(ctx, "GRPC request: %s"), protosanitizer.StripSecrets(req))
+	klog.V(3).Infof(util.Log(ctx, "GRPC call: %s"), info.FullMethod)                     // nolint:gomnd // number specifies log level
+	klog.V(5).Infof(util.Log(ctx, "GRPC request: %s"), protosanitizer.StripSecrets(req)) // nolint:gomnd // number specifies log level
 	resp, err := handler(ctx, req)
 	if err != nil {
 		klog.Errorf(util.Log(ctx, "GRPC error: %v"), err)
 	} else {
-		klog.V(5).Infof(util.Log(ctx, "GRPC response: %s"), protosanitizer.StripSecrets(resp))
+		klog.V(5).Infof(util.Log(ctx, "GRPC response: %s"), protosanitizer.StripSecrets(resp)) // nolint:gomnd // number specifies log level
 	}
 	return resp, err
 }

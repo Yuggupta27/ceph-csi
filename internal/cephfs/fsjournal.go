@@ -94,7 +94,7 @@ func checkVolExists(ctx context.Context, volOptions *volumeOptions, secret map[s
 		return nil, err
 	}
 
-	klog.V(4).Infof(util.Log(ctx, "Found existing volume (%s) with subvolume name (%s) for request (%s)"),
+	klog.V(4).Infof(util.Log(ctx, "Found existing volume (%s) with subvolume name (%s) for request (%s)"), // nolint:gomnd // number specifies log level
 		vid.VolumeID, vid.FsSubvolName, volOptions.RequestName)
 
 	return &vid, nil
@@ -175,7 +175,7 @@ func reserveVol(ctx context.Context, volOptions *volumeOptions, secret map[strin
 		return nil, err
 	}
 
-	klog.V(4).Infof(util.Log(ctx, "Generated Volume ID (%s) and subvolume name (%s) for request name (%s)"),
+	klog.V(4).Infof(util.Log(ctx, "Generated Volume ID (%s) and subvolume name (%s) for request name (%s)"), // nolint:gomnd // number specifies log level
 		vid.VolumeID, vid.FsSubvolName, volOptions.RequestName)
 
 	return &vid, nil

@@ -113,10 +113,11 @@ func (s *nonBlockingGRPCServer) serve(endpoint, hstOptions string, ids csi.Ident
 	if ns != nil {
 		csi.RegisterNodeServer(server, ns)
 	}
-	klog.V(1).Infof("Listening for connections on address: %#v", listener.Addr())
+	klog.V(1).Infof("Listening for connections on address: %#v", listener.Addr()) // nolint:gomnd // number specifies log level
 	if metrics {
 		ho := strings.Split(hstOptions, ",")
-		if len(ho) != 3 {
+		const expectedHo = 3
+		if len(ho) != expectedHo {
 			klog.Fatalf("invalid histogram options provided: %v", hstOptions)
 		}
 		start, e := strconv.ParseFloat(ho[0], 32)

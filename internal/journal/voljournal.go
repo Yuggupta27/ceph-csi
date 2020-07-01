@@ -444,7 +444,7 @@ func reserveOMapName(ctx context.Context, monitors string, cr *util.Credentials,
 			if _, ok := err.(util.ErrObjectExists); ok {
 				attempt++
 				// try again with a different uuid, for maxAttempts tries
-				klog.V(4).Infof(util.Log(ctx, "uuid (%s) conflict detected, retrying (attempt %d of %d)"),
+				klog.V(4).Infof(util.Log(ctx, "uuid (%s) conflict detected, retrying (attempt %d of %d)"), // nolint:gomnd // number specifies log level
 					iterUUID, attempt, maxAttempts)
 				continue
 			}

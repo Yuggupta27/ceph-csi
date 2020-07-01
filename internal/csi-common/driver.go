@@ -85,7 +85,7 @@ func (d *CSIDriver) AddControllerServiceCapabilities(cl []csi.ControllerServiceC
 	var csc []*csi.ControllerServiceCapability
 
 	for _, c := range cl {
-		klog.V(1).Infof("Enabling controller service capability: %v", c.String())
+		klog.V(1).Infof("Enabling controller service capability: %v", c.String()) // nolint:gomnd // number specifies log level
 		csc = append(csc, NewControllerServiceCapability(c))
 	}
 
@@ -96,7 +96,7 @@ func (d *CSIDriver) AddControllerServiceCapabilities(cl []csi.ControllerServiceC
 func (d *CSIDriver) AddVolumeCapabilityAccessModes(vc []csi.VolumeCapability_AccessMode_Mode) []*csi.VolumeCapability_AccessMode {
 	var vca []*csi.VolumeCapability_AccessMode
 	for _, c := range vc {
-		klog.V(1).Infof("Enabling volume access mode: %v", c.String())
+		klog.V(1).Infof("Enabling volume access mode: %v", c.String()) // nolint:gomnd // number specifies log level
 		vca = append(vca, NewVolumeCapabilityAccessMode(c))
 	}
 	d.vc = vca

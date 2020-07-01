@@ -118,7 +118,7 @@ func (ns *NodeServer) NodeStageVolume(ctx context.Context, req *csi.NodeStageVol
 	}
 
 	if isMnt {
-		klog.V(4).Infof(util.Log(ctx, "cephfs: volume %s is already mounted to %s, skipping"), volID, stagingTargetPath)
+		klog.V(4).Infof(util.Log(ctx, "cephfs: volume %s is already mounted to %s, skipping"), volID, stagingTargetPath) // nolint:gomnd // number specifies log level
 		return &csi.NodeStageVolumeResponse{}, nil
 	}
 
@@ -127,7 +127,7 @@ func (ns *NodeServer) NodeStageVolume(ctx context.Context, req *csi.NodeStageVol
 		return nil, err
 	}
 
-	klog.V(4).Infof(util.Log(ctx, "cephfs: successfully mounted volume %s to %s"), volID, stagingTargetPath)
+	klog.V(4).Infof(util.Log(ctx, "cephfs: successfully mounted volume %s to %s"), volID, stagingTargetPath) // nolint:gomnd // number specifies log level
 
 	return &csi.NodeStageVolumeResponse{}, nil
 }
@@ -149,7 +149,7 @@ func (*NodeServer) mount(ctx context.Context, volOptions *volumeOptions, req *cs
 		return status.Error(codes.Internal, err.Error())
 	}
 
-	klog.V(4).Infof(util.Log(ctx, "cephfs: mounting volume %s with %s"), volID, m.name())
+	klog.V(4).Infof(util.Log(ctx, "cephfs: mounting volume %s with %s"), volID, m.name()) // nolint:gomnd // number specifies log level
 
 	readOnly := "ro"
 	fuseMountOptions := strings.Split(volOptions.FuseMountOptions, ",")
@@ -231,7 +231,7 @@ func (ns *NodeServer) NodePublishVolume(ctx context.Context, req *csi.NodePublis
 	}
 
 	if isMnt {
-		klog.V(4).Infof(util.Log(ctx, "cephfs: volume %s is already bind-mounted to %s"), volID, targetPath)
+		klog.V(4).Infof(util.Log(ctx, "cephfs: volume %s is already bind-mounted to %s"), volID, targetPath) // nolint:gomnd // number specifies log level
 		return &csi.NodePublishVolumeResponse{}, nil
 	}
 
@@ -242,7 +242,7 @@ func (ns *NodeServer) NodePublishVolume(ctx context.Context, req *csi.NodePublis
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	klog.V(4).Infof(util.Log(ctx, "cephfs: successfully bind-mounted volume %s to %s"), volID, targetPath)
+	klog.V(4).Infof(util.Log(ctx, "cephfs: successfully bind-mounted volume %s to %s"), volID, targetPath) // nolint:gomnd // number specifies log level
 
 	return &csi.NodePublishVolumeResponse{}, nil
 }
@@ -273,7 +273,7 @@ func (ns *NodeServer) NodeUnpublishVolume(ctx context.Context, req *csi.NodeUnpu
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	klog.V(4).Infof(util.Log(ctx, "cephfs: successfully unbinded volume %s from %s"), req.GetVolumeId(), targetPath)
+	klog.V(4).Infof(util.Log(ctx, "cephfs: successfully unbinded volume %s from %s"), req.GetVolumeId(), targetPath) // nolint:gomnd // number specifies log level
 
 	return &csi.NodeUnpublishVolumeResponse{}, nil
 }
@@ -298,7 +298,7 @@ func (ns *NodeServer) NodeUnstageVolume(ctx context.Context, req *csi.NodeUnstag
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	klog.V(4).Infof(util.Log(ctx, "cephfs: successfully unmounted volume %s from %s"), req.GetVolumeId(), stagingTargetPath)
+	klog.V(4).Infof(util.Log(ctx, "cephfs: successfully unmounted volume %s from %s"), req.GetVolumeId(), stagingTargetPath) // nolint:gomnd // number specifies log level
 
 	return &csi.NodeUnstageVolumeResponse{}, nil
 }

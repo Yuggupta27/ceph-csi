@@ -85,10 +85,10 @@ func loadAvailableMounters(conf *util.Config) error {
 		}
 
 		if conf.ForceKernelCephFS || util.CheckKernelSupport(release, quotaSupport) {
-			klog.V(1).Infof("loaded mounter: %s", volumeMounterKernel)
+			klog.V(1).Infof("loaded mounter: %s", volumeMounterKernel) // nolint:gomnd // number specifies log level
 			availableMounters = append(availableMounters, volumeMounterKernel)
 		} else {
-			klog.V(1).Infof("kernel version < 4.17 might not support quota feature, hence not loading kernel client")
+			klog.V(1).Infof("kernel version < 4.17 might not support quota feature, hence not loading kernel client") // nolint:gomnd // number specifies log level
 		}
 	}
 
@@ -96,7 +96,7 @@ func loadAvailableMounters(conf *util.Config) error {
 	if err != nil {
 		klog.Errorf("failed to run ceph-fuse %v", err)
 	} else {
-		klog.V(1).Infof("loaded mounter: %s", volumeMounterFuse)
+		klog.V(1).Infof("loaded mounter: %s", volumeMounterFuse) // nolint:gomnd // number specifies log level
 		availableMounters = append(availableMounters, volumeMounterFuse)
 	}
 
@@ -131,7 +131,7 @@ func newMounter(volOptions *volumeOptions) (volumeMounter, error) {
 	if chosenMounter == "" {
 		// Otherwise pick whatever is left
 		chosenMounter = availableMounters[0]
-		klog.V(4).Infof("requested mounter: %s, chosen mounter: %s", wantMounter, chosenMounter)
+		klog.V(4).Infof("requested mounter: %s, chosen mounter: %s", wantMounter, chosenMounter) // nolint:gomnd // number specifies log level
 	}
 
 	// Create the mounter
@@ -176,7 +176,8 @@ func mountFuse(ctx context.Context, mountPoint string, cr *util.Credentials, vol
 	// and PID of the ceph-fuse daemon for unmount
 
 	match := fusePidRx.FindSubmatch(stderr)
-	if len(match) != 2 {
+	const reqLenForPID = 2
+	if len(match) != reqLenForPID {
 		return fmt.Errorf("ceph-fuse failed: %s", stderr)
 	}
 

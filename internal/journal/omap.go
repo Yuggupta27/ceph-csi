@@ -72,7 +72,7 @@ func getOMapValues(
 		return nil, err
 	}
 
-	klog.V(4).Infof(
+	klog.V(4).Infof( // nolint:gomnd // number specifies log level
 		util.Log(ctx, "got omap values: (pool=%q, namespace=%q, name=%q): %+v"),
 		poolName, namespace, oid, results)
 	return results, nil
@@ -100,7 +100,7 @@ func removeMapKeys(
 		// the previous implementation of removing omap keys (via the cli)
 		// treated failure to find the omap as a non-error. Do so here to
 		// mimic the previous behavior.
-		klog.V(4).Infof(
+		klog.V(4).Infof( // nolint:gomnd // number specifies log level
 			util.Log(ctx, "when removing omap keys, omap not found (pool=%q, namespace=%q, name=%q): %+v"),
 			poolName, namespace, oid, keys)
 	default:
@@ -109,7 +109,7 @@ func removeMapKeys(
 			poolName, namespace, oid, err)
 		return err
 	}
-	klog.V(4).Infof(
+	klog.V(4).Infof( // nolint:gomnd // number specifies log level
 		util.Log(ctx, "removed omap keys (pool=%q, namespace=%q, name=%q): %+v"),
 		poolName, namespace, oid, keys)
 	return nil
@@ -141,7 +141,7 @@ func setOMapKeys(
 			poolName, namespace, oid, pairs, err)
 		return err
 	}
-	klog.V(4).Infof(
+	klog.V(4).Infof( // nolint:gomnd // number specifies log level
 		util.Log(ctx, "set omap keys (pool=%q, namespace=%q, name=%q): %+v)"),
 		poolName, namespace, oid, pairs)
 	return nil

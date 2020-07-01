@@ -142,7 +142,7 @@ func (ns *NodeServer) NodeStageVolume(ctx context.Context, req *csi.NodeStageVol
 	}
 
 	if !isNotMnt {
-		klog.V(4).Infof(util.Log(ctx, "rbd: volume %s is already mounted to %s, skipping"), volID, stagingTargetPath)
+		klog.V(4).Infof(util.Log(ctx, "rbd: volume %s is already mounted to %s, skipping"), volID, stagingTargetPath) // nolint:gomnd // number specifies log level
 		return &csi.NodeStageVolumeResponse{}, nil
 	}
 
@@ -212,7 +212,7 @@ func (ns *NodeServer) NodeStageVolume(ctx context.Context, req *csi.NodeStageVol
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	klog.V(4).Infof(util.Log(ctx, "rbd: successfully mounted volume %s to stagingTargetPath %s"), req.GetVolumeId(), stagingTargetPath)
+	klog.V(4).Infof(util.Log(ctx, "rbd: successfully mounted volume %s to stagingTargetPath %s"), req.GetVolumeId(), stagingTargetPath) // nolint:gomnd // number specifies log level
 
 	return &csi.NodeStageVolumeResponse{}, nil
 }
@@ -240,7 +240,7 @@ func (ns *NodeServer) stageTransaction(ctx context.Context, req *csi.NodeStageVo
 
 	// Allow image to be mounted on multiple nodes if it is ROX
 	if req.VolumeCapability.AccessMode.Mode == csi.VolumeCapability_AccessMode_MULTI_NODE_READER_ONLY {
-		klog.V(3).Infof(util.Log(ctx, "setting disableInUseChecks on rbd volume to: %v"), req.GetVolumeId)
+		klog.V(3).Infof(util.Log(ctx, "setting disableInUseChecks on rbd volume to: %v"), req.GetVolumeId) // nolint:gomnd // number specifies log level
 		volOptions.DisableInUseChecks = true
 		volOptions.readOnly = true
 	}
@@ -273,7 +273,7 @@ func (ns *NodeServer) stageTransaction(ctx context.Context, req *csi.NodeStageVo
 		return transaction, err
 	}
 	transaction.devicePath = devicePath
-	klog.V(4).Infof(util.Log(ctx, "rbd image: %s/%s was successfully mapped at %s\n"),
+	klog.V(4).Infof(util.Log(ctx, "rbd image: %s/%s was successfully mapped at %s\n"), // nolint:gomnd // number specifies log level
 		req.GetVolumeId(), volOptions.Pool, devicePath)
 
 	if volOptions.Encrypted {
@@ -408,7 +408,7 @@ func (ns *NodeServer) NodePublishVolume(ctx context.Context, req *csi.NodePublis
 		return nil, err
 	}
 
-	klog.V(4).Infof(util.Log(ctx, "rbd: successfully mounted stagingPath %s to targetPath %s"), stagingPath, targetPath)
+	klog.V(4).Infof(util.Log(ctx, "rbd: successfully mounted stagingPath %s to targetPath %s"), stagingPath, targetPath) // nolint:gomnd // number specifies log level
 	return &csi.NodePublishVolumeResponse{}, nil
 }
 
@@ -519,7 +519,7 @@ func (ns *NodeServer) mountVolume(ctx context.Context, stagingPath string, req *
 
 	mountOptions = csicommon.ConstructMountOptions(mountOptions, req.GetVolumeCapability())
 
-	klog.V(4).Infof(util.Log(ctx, "target %v\nisBlock %v\nfstype %v\nstagingPath %v\nreadonly %v\nmountflags %v\n"),
+	klog.V(4).Infof(util.Log(ctx, "target %v\nisBlock %v\nfstype %v\nstagingPath %v\nreadonly %v\nmountflags %v\n"), // nolint:gomnd // number specifies log level
 		targetPath, isBlock, fsType, stagingPath, readOnly, mountOptions)
 
 	if readOnly {
@@ -541,11 +541,11 @@ func (ns *NodeServer) createTargetMountPath(ctx context.Context, mountPath strin
 				// #nosec
 				pathFile, e := os.OpenFile(mountPath, os.O_CREATE|os.O_RDWR, 0750)
 				if e != nil {
-					klog.V(4).Infof(util.Log(ctx, "Failed to create mountPath:%s with error: %v"), mountPath, err)
+					klog.V(4).Infof(util.Log(ctx, "Failed to create mountPath:%s with error: %v"), mountPath, err) // nolint:gomnd // number specifies log level
 					return notMnt, status.Error(codes.Internal, e.Error())
 				}
 				if err = pathFile.Close(); err != nil {
-					klog.V(4).Infof(util.Log(ctx, "Failed to close mountPath:%s with error: %v"), mountPath, err)
+					klog.V(4).Infof(util.Log(ctx, "Failed to close mountPath:%s with error: %v"), mountPath, err) // nolint:gomnd // number specifies log level
 					return notMnt, status.Error(codes.Internal, err.Error())
 				}
 			} else {
@@ -582,7 +582,7 @@ func (ns *NodeServer) NodeUnpublishVolume(ctx context.Context, req *csi.NodeUnpu
 	if err != nil {
 		if os.IsNotExist(err) {
 			// targetPath has already been deleted
-			klog.V(4).Infof(util.Log(ctx, "targetPath: %s has already been deleted"), targetPath)
+			klog.V(4).Infof(util.Log(ctx, "targetPath: %s has already been deleted"), targetPath) // nolint:gomnd // number specifies log level
 			return &csi.NodeUnpublishVolumeResponse{}, nil
 		}
 		return nil, status.Error(codes.NotFound, err.Error())
@@ -602,7 +602,7 @@ func (ns *NodeServer) NodeUnpublishVolume(ctx context.Context, req *csi.NodeUnpu
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	klog.V(4).Infof(util.Log(ctx, "rbd: successfully unbound volume %s from %s"), req.GetVolumeId(), targetPath)
+	klog.V(4).Infof(util.Log(ctx, "rbd: successfully unbound volume %s from %s"), req.GetVolumeId(), targetPath) // nolint:gomnd // number specifies log level
 
 	return &csi.NodeUnpublishVolumeResponse{}, nil
 }
@@ -650,7 +650,7 @@ func (ns *NodeServer) NodeUnstageVolume(ctx context.Context, req *csi.NodeUnstag
 		// Unmounting the image
 		err = ns.mounter.Unmount(stagingTargetPath)
 		if err != nil {
-			klog.V(3).Infof(util.Log(ctx, "failed to unmount targetPath: %s with error: %v"), stagingTargetPath, err)
+			klog.V(3).Infof(util.Log(ctx, "failed to unmount targetPath: %s with error: %v"), stagingTargetPath, err) // nolint:gomnd // number specifies log level
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 	}
@@ -667,7 +667,7 @@ func (ns *NodeServer) NodeUnstageVolume(ctx context.Context, req *csi.NodeUnstag
 
 	imgInfo, err := lookupRBDImageMetadataStash(stagingParentPath)
 	if err != nil {
-		klog.V(2).Infof(util.Log(ctx, "failed to find image metadata: %v"), err)
+		klog.V(2).Infof(util.Log(ctx, "failed to find image metadata: %v"), err) // nolint:gomnd // number specifies log level
 		// It is an error if it was mounted, as we should have found the image metadata file with
 		// no errors
 		if !notMnt {
@@ -691,7 +691,7 @@ func (ns *NodeServer) NodeUnstageVolume(ctx context.Context, req *csi.NodeUnstag
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	klog.V(4).Infof(util.Log(ctx, "successfully unmounted volume (%s) from staging path (%s)"),
+	klog.V(4).Infof(util.Log(ctx, "successfully unmounted volume (%s) from staging path (%s)"), // nolint:gomnd // number specifies log level
 		req.GetVolumeId(), stagingTargetPath)
 
 	if err = cleanupRBDImageMetadataStash(stagingParentPath); err != nil {
@@ -878,7 +878,7 @@ func openEncryptedDevice(ctx context.Context, volOptions *rbdVolume, devicePath 
 		return devicePath, err
 	}
 	if isOpen {
-		klog.V(4).Infof(util.Log(ctx, "encrypted device is already open at %s"), mapperFilePath)
+		klog.V(4).Infof(util.Log(ctx, "encrypted device is already open at %s"), mapperFilePath) // nolint:gomnd // number specifies log level
 	} else {
 		err = util.OpenEncryptedVolume(ctx, devicePath, mapperFile, passphrase)
 		if err != nil {

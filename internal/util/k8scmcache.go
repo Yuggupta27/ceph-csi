@@ -123,7 +123,7 @@ func (k8scm *K8sCMCache) ForAll(pattern string, destObj interface{}, f ForAllFun
 func (k8scm *K8sCMCache) Create(identifier string, data interface{}) error {
 	cm, err := k8scm.getMetadataCM(identifier)
 	if cm != nil && err == nil {
-		klog.V(4).Infof("k8s-cm-cache: configmap %s already exists, skipping configmap creation", identifier)
+		klog.V(4).Infof("k8s-cm-cache: configmap %s already exists, skipping configmap creation", identifier) // nolint:gomnd // number specifies log level
 		return nil
 	}
 	dataJSON, err := json.Marshal(data)
@@ -145,13 +145,13 @@ func (k8scm *K8sCMCache) Create(identifier string, data interface{}) error {
 	_, err = k8scm.Client.CoreV1().ConfigMaps(k8scm.Namespace).Create(context.TODO(), cm, metav1.CreateOptions{})
 	if err != nil {
 		if apierrs.IsAlreadyExists(err) {
-			klog.V(4).Infof("k8s-cm-cache: configmap %s already exists", identifier)
+			klog.V(4).Infof("k8s-cm-cache: configmap %s already exists", identifier) // nolint:gomnd // number specifies log level
 			return nil
 		}
 		return errors.Wrapf(err, "k8s-cm-cache: couldn't persist %s metadata as configmap", identifier)
 	}
 
-	klog.V(4).Infof("k8s-cm-cache: configmap %s successfully created", identifier)
+	klog.V(4).Infof("k8s-cm-cache: configmap %s successfully created", identifier) // nolint:gomnd // number specifies log level
 	return nil
 }
 
@@ -177,12 +177,12 @@ func (k8scm *K8sCMCache) Delete(identifier string) error {
 	err := k8scm.Client.CoreV1().ConfigMaps(k8scm.Namespace).Delete(context.TODO(), identifier, metav1.DeleteOptions{})
 	if err != nil {
 		if apierrs.IsNotFound(err) {
-			klog.V(4).Infof("k8s-cm-cache: cannot delete missing metadata configmap %s, assuming it's already deleted", identifier)
+			klog.V(4).Infof("k8s-cm-cache: cannot delete missing metadata configmap %s, assuming it's already deleted", identifier) // nolint:gomnd // number specifies log level
 			return nil
 		}
 
 		return errors.Wrapf(err, "k8s-cm-cache: couldn't delete metadata configmap %s", identifier)
 	}
-	klog.V(4).Infof("k8s-cm-cache: successfully deleted metadata configmap %s", identifier)
+	klog.V(4).Infof("k8s-cm-cache: successfully deleted metadata configmap %s", identifier) // nolint:gomnd // number specifies log level
 	return nil
 }

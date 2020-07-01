@@ -149,7 +149,7 @@ func GetCryptoPassphrase(ctx context.Context, volumeID string, kms EncryptionKMS
 		return passphrase, nil
 	}
 	if _, ok := err.(MissingPassphrase); ok {
-		klog.V(4).Infof(Log(ctx, "Encryption passphrase is missing for %s. Generating a new one"),
+		klog.V(4).Infof(Log(ctx, "Encryption passphrase is missing for %s. Generating a new one"), // nolint:gomnd // number specifies log level
 			volumeID)
 		passphrase, err = generateNewEncryptionPassphrase()
 		if err != nil {
@@ -184,7 +184,7 @@ func VolumeMapper(volumeID string) (mapperFile, mapperFilePath string) {
 
 // EncryptVolume encrypts provided device with LUKS.
 func EncryptVolume(ctx context.Context, devicePath, passphrase string) error {
-	klog.V(4).Infof(Log(ctx, "Encrypting device %s with LUKS"), devicePath)
+	klog.V(4).Infof(Log(ctx, "Encrypting device %s with LUKS"), devicePath) // nolint:gomnd // number specifies log level
 	if _, _, err := LuksFormat(devicePath, passphrase); err != nil {
 		return errors.Wrapf(err, "failed to encrypt device %s with LUKS", devicePath)
 	}
@@ -193,14 +193,14 @@ func EncryptVolume(ctx context.Context, devicePath, passphrase string) error {
 
 // OpenEncryptedVolume opens volume so that it can be used by the client.
 func OpenEncryptedVolume(ctx context.Context, devicePath, mapperFile, passphrase string) error {
-	klog.V(4).Infof(Log(ctx, "Opening device %s with LUKS on %s"), devicePath, mapperFile)
+	klog.V(4).Infof(Log(ctx, "Opening device %s with LUKS on %s"), devicePath, mapperFile) // nolint:gomnd // number specifies log level
 	_, _, err := LuksOpen(devicePath, mapperFile, passphrase)
 	return err
 }
 
 // CloseEncryptedVolume closes encrypted volume so it can be detached.
 func CloseEncryptedVolume(ctx context.Context, mapperFile string) error {
-	klog.V(4).Infof(Log(ctx, "Closing LUKS device %s"), mapperFile)
+	klog.V(4).Infof(Log(ctx, "Closing LUKS device %s"), mapperFile) // nolint:gomnd // number specifies log level
 	_, _, err := LuksClose(mapperFile)
 	return err
 }
@@ -221,7 +221,7 @@ func DeviceEncryptionStatus(ctx context.Context, devicePath string) (mappedDevic
 	mapPath := strings.TrimPrefix(devicePath, mapperFilePathPrefix+"/")
 	stdout, _, err := LuksStatus(mapPath)
 	if err != nil {
-		klog.V(4).Infof(Log(ctx, "device %s is not an active LUKS device: %v"), devicePath, err)
+		klog.V(4).Infof(Log(ctx, "device %s is not an active LUKS device: %v"), devicePath, err) // nolint:gomnd // number specifies log level
 		return devicePath, "", nil
 	}
 	lines := strings.Split(string(stdout), "\n")
