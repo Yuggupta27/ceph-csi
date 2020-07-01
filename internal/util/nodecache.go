@@ -29,7 +29,7 @@ import (
 	"k8s.io/klog"
 )
 
-// NodeCache to store metadata
+// NodeCache to store metadata.
 type NodeCache struct {
 	BasePath string
 	CacheDir string
@@ -37,7 +37,7 @@ type NodeCache struct {
 
 var errDec = errors.New("file not found")
 
-// EnsureCacheDirectory creates cache directory if not present
+// EnsureCacheDirectory creates cache directory if not present.
 func (nc *NodeCache) EnsureCacheDirectory(cacheDir string) error {
 	fullPath := path.Join(nc.BasePath, cacheDir)
 	if _, err := os.Stat(fullPath); os.IsNotExist(err) {
@@ -49,7 +49,7 @@ func (nc *NodeCache) EnsureCacheDirectory(cacheDir string) error {
 	return nil
 }
 
-// ForAll list the metadata in Nodecache and filters outs based on the pattern
+// ForAll list the metadata in Nodecache and filters outs based on the pattern.
 func (nc *NodeCache) ForAll(pattern string, destObj interface{}, f ForAllFunc) error {
 	err := nc.EnsureCacheDirectory(nc.CacheDir)
 	if err != nil {
@@ -98,7 +98,7 @@ func decodeObj(fpath, pattern string, file os.FileInfo, destObj interface{}) err
 	return nil
 }
 
-// Create creates the metadata file in cache directory with identifier name
+// Create creates the metadata file in cache directory with identifier name.
 func (nc *NodeCache) Create(identifier string, data interface{}) error {
 	file := path.Join(nc.BasePath, nc.CacheDir, identifier+".json")
 	fp, err := os.Create(file)
@@ -120,7 +120,7 @@ func (nc *NodeCache) Create(identifier string, data interface{}) error {
 	return nil
 }
 
-// Get retrieves the metadata from cache directory with identifier name
+// Get retrieves the metadata from cache directory with identifier name.
 func (nc *NodeCache) Get(identifier string, data interface{}) error {
 	file := path.Join(nc.BasePath, nc.CacheDir, identifier+".json")
 	// #nosec
@@ -147,7 +147,7 @@ func (nc *NodeCache) Get(identifier string, data interface{}) error {
 	return nil
 }
 
-// Delete deletes the metadata file from cache directory with identifier name
+// Delete deletes the metadata file from cache directory with identifier name.
 func (nc *NodeCache) Delete(identifier string) error {
 	file := path.Join(nc.BasePath, nc.CacheDir, identifier+".json")
 	err := os.Remove(file)

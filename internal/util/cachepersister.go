@@ -26,12 +26,12 @@ import (
 // matching the `pattern' in CachePersister's ForAll function.
 type ForAllFunc func(identifier string) error
 
-// CacheEntryNotFound is an error type for "Not Found" cache errors
+// CacheEntryNotFound is an error type for "Not Found" cache errors.
 type CacheEntryNotFound struct {
 	error
 }
 
-// CachePersister interface implemented for store
+// CachePersister interface implemented for store.
 type CachePersister interface {
 	Create(identifier string, data interface{}) error
 	Get(identifier string, data interface{}) error
@@ -39,7 +39,7 @@ type CachePersister interface {
 	Delete(identifier string) error
 }
 
-// NewCachePersister returns CachePersister based on store
+// NewCachePersister returns CachePersister based on store.
 func NewCachePersister(metadataStore, pluginPath string) (CachePersister, error) {
 	if metadataStore == "k8s_configmap" {
 		klog.V(4).Infof("cache-perister: using kubernetes configmap as metadata cache persister")

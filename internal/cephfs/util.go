@@ -83,7 +83,7 @@ func pathExists(p string) bool {
 	return err == nil
 }
 
-// Controller service request validation
+// Controller service request validation.
 func (cs *ControllerServer) validateCreateVolumeRequest(req *csi.CreateVolumeRequest) error {
 	if err := cs.Driver.ValidateControllerServiceRequest(csi.ControllerServiceCapability_RPC_CREATE_DELETE_VOLUME); err != nil {
 		return fmt.Errorf("invalid CreateVolumeRequest: %v", err)
@@ -115,7 +115,7 @@ func (cs *ControllerServer) validateDeleteVolumeRequest() error {
 	return nil
 }
 
-// Controller expand volume request validation
+// Controller expand volume request validation.
 func (cs *ControllerServer) validateExpandVolumeRequest(req *csi.ControllerExpandVolumeRequest) error {
 	if err := cs.Driver.ValidateControllerServiceRequest(csi.ControllerServiceCapability_RPC_EXPAND_VOLUME); err != nil {
 		return fmt.Errorf("invalid ExpandVolumeRequest: %v", err)

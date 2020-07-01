@@ -33,7 +33,7 @@ import (
 	"k8s.io/klog"
 )
 
-// K8sCMCache to store metadata
+// K8sCMCache to store metadata.
 type K8sCMCache struct {
 	Client    *k8s.Clientset
 	Namespace string
@@ -49,7 +49,7 @@ const (
 )
 
 // GetK8sNamespace returns pod namespace. if pod namespace is empty
-// it returns default namespace
+// it returns default namespace.
 func GetK8sNamespace() string {
 	namespace := os.Getenv("POD_NAMESPACE")
 	if namespace == "" {
@@ -58,7 +58,7 @@ func GetK8sNamespace() string {
 	return namespace
 }
 
-// NewK8sClient create kubernetes client
+// NewK8sClient create kubernetes client.
 func NewK8sClient() *k8s.Clientset {
 	var cfg *rest.Config
 	var err error
@@ -92,7 +92,7 @@ func (k8scm *K8sCMCache) getMetadataCM(resourceID string) (*v1.ConfigMap, error)
 	return cm, nil
 }
 
-// ForAll list the metadata in configmaps and filters outs based on the pattern
+// ForAll list the metadata in configmaps and filters outs based on the pattern.
 func (k8scm *K8sCMCache) ForAll(pattern string, destObj interface{}, f ForAllFunc) error {
 	listOpts := metav1.ListOptions{LabelSelector: fmt.Sprintf("%s=%s", csiMetadataLabelAttr, cmLabel)}
 	cms, err := k8scm.Client.CoreV1().ConfigMaps(k8scm.Namespace).List(context.TODO(), listOpts)
@@ -119,7 +119,7 @@ func (k8scm *K8sCMCache) ForAll(pattern string, destObj interface{}, f ForAllFun
 	return nil
 }
 
-// Create stores the metadata in configmaps with identifier name
+// Create stores the metadata in configmaps with identifier name.
 func (k8scm *K8sCMCache) Create(identifier string, data interface{}) error {
 	cm, err := k8scm.getMetadataCM(identifier)
 	if cm != nil && err == nil {
@@ -155,7 +155,7 @@ func (k8scm *K8sCMCache) Create(identifier string, data interface{}) error {
 	return nil
 }
 
-// Get retrieves the metadata in configmaps with identifier name
+// Get retrieves the metadata in configmaps with identifier name.
 func (k8scm *K8sCMCache) Get(identifier string, data interface{}) error {
 	cm, err := k8scm.getMetadataCM(identifier)
 	if err != nil {
@@ -172,7 +172,7 @@ func (k8scm *K8sCMCache) Get(identifier string, data interface{}) error {
 	return nil
 }
 
-// Delete deletes the metadata in configmaps with identifier name
+// Delete deletes the metadata in configmaps with identifier name.
 func (k8scm *K8sCMCache) Delete(identifier string) error {
 	err := k8scm.Client.CoreV1().ConfigMaps(k8scm.Namespace).Delete(context.TODO(), identifier, metav1.DeleteOptions{})
 	if err != nil {

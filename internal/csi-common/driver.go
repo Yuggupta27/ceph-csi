@@ -25,7 +25,7 @@ import (
 	"k8s.io/klog"
 )
 
-// CSIDriver stores driver information
+// CSIDriver stores driver information.
 type CSIDriver struct {
 	name    string
 	nodeID  string
@@ -65,7 +65,7 @@ func NewCSIDriver(name, v, nodeID string) *CSIDriver {
 }
 
 // ValidateControllerServiceRequest validates the controller
-// plugin capabilities
+// plugin capabilities.
 func (d *CSIDriver) ValidateControllerServiceRequest(c csi.ControllerServiceCapability_RPC_Type) error {
 	if c == csi.ControllerServiceCapability_RPC_UNKNOWN {
 		return nil
@@ -80,7 +80,7 @@ func (d *CSIDriver) ValidateControllerServiceRequest(c csi.ControllerServiceCapa
 }
 
 // AddControllerServiceCapabilities stores the controller capabilities
-// in driver object
+// in driver object.
 func (d *CSIDriver) AddControllerServiceCapabilities(cl []csi.ControllerServiceCapability_RPC_Type) {
 	var csc []*csi.ControllerServiceCapability
 
@@ -92,7 +92,7 @@ func (d *CSIDriver) AddControllerServiceCapabilities(cl []csi.ControllerServiceC
 	d.cap = csc
 }
 
-// AddVolumeCapabilityAccessModes stores volume access modes
+// AddVolumeCapabilityAccessModes stores volume access modes.
 func (d *CSIDriver) AddVolumeCapabilityAccessModes(vc []csi.VolumeCapability_AccessMode_Mode) []*csi.VolumeCapability_AccessMode {
 	var vca []*csi.VolumeCapability_AccessMode
 	for _, c := range vc {
@@ -103,7 +103,7 @@ func (d *CSIDriver) AddVolumeCapabilityAccessModes(vc []csi.VolumeCapability_Acc
 	return vca
 }
 
-// GetVolumeCapabilityAccessModes returns access modes
+// GetVolumeCapabilityAccessModes returns access modes.
 func (d *CSIDriver) GetVolumeCapabilityAccessModes() []*csi.VolumeCapability_AccessMode {
 	return d.vc
 }

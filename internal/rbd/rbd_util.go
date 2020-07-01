@@ -68,7 +68,7 @@ const (
 	imageOptionCloneFormat = librbd.RbdImageOption(12)
 )
 
-// rbdVolume represents a CSI volume and its RBD image specifics
+// rbdVolume represents a CSI volume and its RBD image specifics.
 type rbdVolume struct {
 	// RbdImageName is the name of the RBD image backing this rbdVolume. This does not have a
 	//   JSON tag as it is not stashed in JSON encoded config maps in v1.0.0
@@ -115,7 +115,7 @@ type rbdVolume struct {
 	ioctx *rados.IOContext
 }
 
-// rbdSnapshot represents a CSI snapshot and its RBD snapshot specifics
+// rbdSnapshot represents a CSI snapshot and its RBD snapshot specifics.
 type rbdSnapshot struct {
 	// SourceVolumeID is the volume ID of RbdImageName, that is exchanged with CSI drivers
 	// RbdImageName is the name of the RBD image, that is this rbdSnapshot's source image
@@ -143,7 +143,7 @@ var (
 	supportedFeatures = sets.NewString(librbd.FeatureNameLayering)
 )
 
-// Connect an rbdVolume to the Ceph cluster
+// Connect an rbdVolume to the Ceph cluster.
 func (rv *rbdVolume) Connect(cr *util.Credentials) error {
 	if rv.conn != nil {
 		return nil
@@ -169,12 +169,12 @@ func (rv *rbdVolume) Destroy() {
 	}
 }
 
-// String returns the image-spec (pool/image) format of the image
+// String returns the image-spec (pool/image) format of the image.
 func (rv *rbdVolume) String() string {
 	return fmt.Sprintf("%s/%s", rv.Pool, rv.RbdImageName)
 }
 
-// String returns the snap-spec (pool/image@snap) format of the snapshot
+// String returns the snap-spec (pool/image@snap) format of the snapshot.
 func (rs *rbdSnapshot) String() string {
 	return fmt.Sprintf("%s/%s@%s", rs.Pool, rs.RbdImageName, rs.RbdSnapName)
 }
@@ -238,7 +238,7 @@ func (rv *rbdVolume) openIoctx() error {
 }
 
 // getImageID queries rbd about the given image and stores its id, returns
-// ErrImageNotFound if provided image is not found
+// ErrImageNotFound if provided image is not found.
 func (rv *rbdVolume) getImageID() error {
 	if rv.ImageID != "" {
 		return nil
@@ -311,7 +311,7 @@ func rbdStatus(ctx context.Context, pOpts *rbdVolume, cr *util.Credentials) (boo
 
 // addRbdManagerTask adds a ceph manager task to execute command
 // asynchronously. If command is not found returns a bool set to false
-// example arg ["trash", "remove","pool/image"]
+// example arg ["trash", "remove","pool/image"].
 func addRbdManagerTask(ctx context.Context, pOpts *rbdVolume, arg []string) (bool, error) {
 	var output []byte
 	args := []string{"rbd", "task", "add"}
@@ -504,7 +504,7 @@ func (rv *rbdVolume) checkImageChainHasFeature(ctx context.Context, feature uint
 }
 
 // genSnapFromSnapID generates a rbdSnapshot structure from the provided identifier, updating
-// the structure with elements from on-disk snapshot metadata as well
+// the structure with elements from on-disk snapshot metadata as well.
 func genSnapFromSnapID(ctx context.Context, rbdSnap *rbdSnapshot, snapshotID string, cr *util.Credentials) error {
 	var (
 		options map[string]string
@@ -562,7 +562,7 @@ func genSnapFromSnapID(ctx context.Context, rbdSnap *rbdSnapshot, snapshotID str
 }
 
 // genVolFromVolID generates a rbdVolume structure from the provided identifier, updating
-// the structure with elements from on-disk image metadata as well
+// the structure with elements from on-disk image metadata as well.
 func genVolFromVolID(ctx context.Context, volumeID string, cr *util.Credentials, secrets map[string]string) (*rbdVolume, error) {
 	var (
 		options map[string]string
@@ -678,7 +678,7 @@ func getMonsAndClusterID(ctx context.Context, options map[string]string) (monito
 }
 
 // isLegacyVolumeID checks if passed in volume ID string conforms to volume ID naming scheme used
-// by the version 1.0.0 (legacy) of the plugin, and returns true if found to be conforming
+// by the version 1.0.0 (legacy) of the plugin, and returns true if found to be conforming.
 func isLegacyVolumeID(volumeID string) bool {
 	// Version 1.0.0 volumeID format: "csi-rbd-vol-" + UUID string
 	//    length: 12 ("csi-rbd-vol-") + 36 (UUID string)
@@ -833,7 +833,7 @@ func genSnapFromOptions(ctx context.Context, rbdVol *rbdVolume, snapOptions map[
 	return rbdSnap
 }
 
-// hasSnapshotFeature checks if Layering is enabled for this image
+// hasSnapshotFeature checks if Layering is enabled for this image.
 func (rv *rbdVolume) hasSnapshotFeature() bool {
 	return (uint64(rv.imageFeatureSet) & librbd.FeatureLayering) == librbd.FeatureLayering
 }
@@ -901,7 +901,7 @@ func (rv *rbdVolume) cloneRbdImageFromSnapshot(ctx context.Context, pSnapOpts *r
 	return nil
 }
 
-// imageInfo strongly typed JSON spec for image info
+// imageInfo strongly typed JSON spec for image info.
 type imageInfo struct {
 	ObjectUUID string     `json:"name"`
 	Size       int64      `json:"size"`
@@ -910,7 +910,7 @@ type imageInfo struct {
 	Parent     parentInfo `json:"parent"`
 }
 
-// parentInfo  spec for parent volume  info
+// parentInfo  spec for parent volume  info.
 type parentInfo struct {
 	Image    string `json:"image"`
 	Pool     string `json:"pool"`
@@ -918,7 +918,7 @@ type parentInfo struct {
 }
 
 // updateVolWithImageInfo updates provided rbdVolume with information from on-disk data
-// regarding the same
+// regarding the same.
 func (rv *rbdVolume) updateVolWithImageInfo(cr *util.Credentials) error {
 	// rbd --format=json info [image-spec | snap-spec]
 	var imgInfo imageInfo
@@ -958,7 +958,7 @@ func (rv *rbdVolume) updateVolWithImageInfo(cr *util.Credentials) error {
 }
 
 // getImageInfo queries rbd about the given image and returns its metadata, and returns
-// ErrImageNotFound if provided image is not found
+// ErrImageNotFound if provided image is not found.
 func (rv *rbdVolume) getImageInfo() error {
 	image, err := rv.open()
 	if err != nil {
@@ -989,7 +989,7 @@ func (rv *rbdVolume) getImageInfo() error {
 /*
 getSnapInfo queries rbd about the snapshots of the given image and returns its metadata, and
 returns ErrImageNotFound if provided image is not found, and ErrSnapNotFound if provided snap
-is not found in the images snapshot list
+is not found in the images snapshot list.
 */
 func (rv *rbdVolume) getSnapInfo(rbdSnap *rbdSnapshot) (librbd.SnapInfo, error) {
 	invalidSnap := librbd.SnapInfo{}
@@ -1013,7 +1013,7 @@ func (rv *rbdVolume) getSnapInfo(rbdSnap *rbdSnapshot) (librbd.SnapInfo, error) 
 	return invalidSnap, ErrSnapNotFound{rbdSnap.RbdSnapName, fmt.Errorf("snap %s not found", rbdSnap.String())}
 }
 
-// rbdImageMetadataStash strongly typed JSON spec for stashed RBD image metadata
+// rbdImageMetadataStash strongly typed JSON spec for stashed RBD image metadata.
 type rbdImageMetadataStash struct {
 	Version   int    `json:"Version"`
 	Pool      string `json:"pool"`
@@ -1022,16 +1022,16 @@ type rbdImageMetadataStash struct {
 	Encrypted bool   `json:"encrypted"`
 }
 
-// file name in which image metadata is stashed
+// file name in which image metadata is stashed.
 const stashFileName = "image-meta.json"
 
-// spec returns the image-spec (pool/image) format of the image
+// spec returns the image-spec (pool/image) format of the image.
 func (ri *rbdImageMetadataStash) String() string {
 	return fmt.Sprintf("%s/%s", ri.Pool, ri.ImageName)
 }
 
 // stashRBDImageMetadata stashes required fields into the stashFileName at the passed in path, in
-// JSON format
+// JSON format.
 func stashRBDImageMetadata(volOptions *rbdVolume, path string) error {
 	var imgMeta = rbdImageMetadataStash{
 		Version:   2, // there are no checks for this at present
@@ -1059,7 +1059,7 @@ func stashRBDImageMetadata(volOptions *rbdVolume, path string) error {
 	return nil
 }
 
-// lookupRBDImageMetadataStash reads and returns stashed image metadata at passed in path
+// lookupRBDImageMetadataStash reads and returns stashed image metadata at passed in path.
 func lookupRBDImageMetadataStash(path string) (rbdImageMetadataStash, error) {
 	var imgMeta rbdImageMetadataStash
 
@@ -1081,7 +1081,7 @@ func lookupRBDImageMetadataStash(path string) (rbdImageMetadataStash, error) {
 	return imgMeta, nil
 }
 
-// cleanupRBDImageMetadataStash cleans up any stashed metadata at passed in path
+// cleanupRBDImageMetadataStash cleans up any stashed metadata at passed in path.
 func cleanupRBDImageMetadataStash(path string) error {
 	fPath := filepath.Join(path, stashFileName)
 	if err := os.Remove(fPath); err != nil {
@@ -1091,7 +1091,7 @@ func cleanupRBDImageMetadataStash(path string) error {
 	return nil
 }
 
-// resizeRBDImage resizes the given volume to new size
+// resizeRBDImage resizes the given volume to new size.
 func resizeRBDImage(rbdVol *rbdVolume, cr *util.Credentials) error {
 	var output []byte
 
@@ -1128,7 +1128,7 @@ func (rv *rbdVolume) SetMetadata(key, value string) error {
 	return image.SetMetadata(key, value)
 }
 
-// checkRbdImageEncrypted verifies if rbd image was encrypted when created
+// checkRbdImageEncrypted verifies if rbd image was encrypted when created.
 func (rv *rbdVolume) checkRbdImageEncrypted(ctx context.Context) (string, error) {
 	value, err := rv.GetMetadata(encryptionMetaKey)
 	if err != nil {

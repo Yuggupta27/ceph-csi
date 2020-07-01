@@ -415,7 +415,7 @@ func createRBDSecret(c kubernetes.Interface, f *framework.Framework) {
 
 // updateSecretForEncryption is an hack to update the secrets created by rook to
 // include the encyption key
-// TODO in cephcsi we need to create own users in ceph cluster and use it for E2E
+// TODO in cephcsi we need to create own users in ceph cluster and use it for E2E.
 func updateSecretForEncryption(c kubernetes.Interface) error {
 	secrets, err := c.CoreV1().Secrets(rookNamespace).Get(context.TODO(), rbdProvisionerSecretName, metav1.GetOptions{})
 	if err != nil {
@@ -630,7 +630,7 @@ func unmarshal(fileName string, obj interface{}) error {
 }
 
 // createPVCAndApp creates pvc and pod
-// if name is not empty same will be set as pvc and app name
+// if name is not empty same will be set as pvc and app name.
 func createPVCAndApp(name string, f *framework.Framework, pvc *v1.PersistentVolumeClaim, app *v1.Pod, pvcTimeout int) error {
 	if name != "" {
 		pvc.Name = name
@@ -646,7 +646,7 @@ func createPVCAndApp(name string, f *framework.Framework, pvc *v1.PersistentVolu
 }
 
 // deletePVCAndApp delete pvc and pod
-// if name is not empty same will be set as pvc and app name
+// if name is not empty same will be set as pvc and app name.
 func deletePVCAndApp(name string, f *framework.Framework, pvc *v1.PersistentVolumeClaim, app *v1.Pod) error {
 	if name != "" {
 		pvc.Name = name
@@ -700,7 +700,7 @@ type imageInfoFromPVC struct {
 }
 
 // getImageInfoFromPVC reads volume handle of the bound PV to the passed in PVC,
-// and returns imageInfoFromPVC or error
+// and returns imageInfoFromPVC or error.
 func getImageInfoFromPVC(pvcNamespace, pvcName string, f *framework.Framework) (imageInfoFromPVC, error) {
 	var imageData imageInfoFromPVC
 
@@ -753,7 +753,7 @@ func getMountType(appName, appNamespace, mountPath string, f *framework.Framewor
 //  * authenticate with vault and ignore any stdout (we do not need output)
 //  * issue get request for particular key
 // resulting in stdOut (first entry in tuple) - output that contains the key
-// or stdErr (second entry in tuple) - error getting the key
+// or stdErr (second entry in tuple) - error getting the key.
 func readVaultSecret(key string, f *framework.Framework) (string, string) {
 	loginCmd := fmt.Sprintf("vault login -address=%s sample_root_token_id > /dev/null", vaultAddr)
 	readSecret := fmt.Sprintf("vault kv get -address=%s %s%s", vaultAddr, vaultSecretNs, key)

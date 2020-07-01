@@ -24,7 +24,7 @@ import (
 )
 
 // nolint: gocyclo
-// TestFindPoolAndTopology also tests MatchTopologyForPool
+// TestFindPoolAndTopology also tests MatchTopologyForPool.
 func TestFindPoolAndTopology(t *testing.T) {
 	var err error
 	var label1 = "region"

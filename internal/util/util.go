@@ -35,7 +35,7 @@ import (
 	"k8s.io/utils/mount"
 )
 
-// RoundOffVolSize rounds up given quantity upto chunks of MiB/GiB
+// RoundOffVolSize rounds up given quantity upto chunks of MiB/GiB.
 func RoundOffVolSize(size int64) int64 {
 	size = RoundOffBytes(size)
 	// convert size back to MiB for rbd CLI
@@ -44,7 +44,7 @@ func RoundOffVolSize(size int64) int64 {
 
 // RoundOffBytes converts roundoff the size
 // 1.1Mib will be round off to 2Mib same for GiB
-// size less than 1MiB will be round off to 1MiB
+// size less than 1MiB will be round off to 1MiB.
 func RoundOffBytes(bytes int64) int64 {
 	var num int64
 	floatBytes := float64(bytes)
@@ -59,7 +59,7 @@ func RoundOffBytes(bytes int64) int64 {
 	return num
 }
 
-// variables which will be set during the build time
+// variables which will be set during the build time.
 var (
 	// GitCommit tell the latest git commit image is built from
 	GitCommit string
@@ -67,7 +67,7 @@ var (
 	DriverVersion string
 )
 
-// Config holds the parameters list which can be configured
+// Config holds the parameters list which can be configured.
 type Config struct {
 	Vtype           string // driver type [rbd|cephfs|liveness]
 	Endpoint        string // CSI endpoint
@@ -109,7 +109,7 @@ type Config struct {
 	RbdSoftMaxCloneDepth uint
 }
 
-// CreatePersistanceStorage creates storage path and initializes new cache
+// CreatePersistanceStorage creates storage path and initializes new cache.
 func CreatePersistanceStorage(sPath, metaDataStore, pluginPath string) (CachePersister, error) {
 	var err error
 	if err = CreateMountPoint(path.Join(sPath, "controller")); err != nil {
@@ -130,7 +130,7 @@ func CreatePersistanceStorage(sPath, metaDataStore, pluginPath string) (CachePer
 	return cp, err
 }
 
-// ValidateDriverName validates the driver name
+// ValidateDriverName validates the driver name.
 func ValidateDriverName(driverName string) error {
 	if driverName == "" {
 		return errors.New("driver name is empty")
@@ -161,7 +161,7 @@ func GetKernelVersion() (string, error) {
 	return strings.TrimRight(string(utsname.Release[:]), "\x00"), nil
 }
 
-// KernelVersion holds kernel related informations
+// KernelVersion holds kernel related informations.
 type KernelVersion struct {
 	Version      int
 	PatchLevel   int
@@ -246,7 +246,7 @@ func CheckKernelSupport(release string, supportedVersions []KernelVersion) bool 
 }
 
 // GenerateVolID generates a volume ID based on passed in parameters and version, to be returned
-// to the CO system
+// to the CO system.
 func GenerateVolID(ctx context.Context, monitors string, cr *Credentials, locationID int64, pool, clusterID, objUUID string, volIDVersion uint16) (string, error) {
 	var err error
 
@@ -270,12 +270,12 @@ func GenerateVolID(ctx context.Context, monitors string, cr *Credentials, locati
 	return volID, err
 }
 
-// CreateMountPoint creates the directory with given path
+// CreateMountPoint creates the directory with given path.
 func CreateMountPoint(mountPath string) error {
 	return os.MkdirAll(mountPath, 0750)
 }
 
-// checkDirExists checks directory  exists or not
+// checkDirExists checks directory  exists or not.
 func checkDirExists(p string) bool {
 	if _, err := os.Stat(p); os.IsNotExist(err) {
 		return false
@@ -283,7 +283,7 @@ func checkDirExists(p string) bool {
 	return true
 }
 
-// IsMountPoint checks if the given path is mountpoint or not
+// IsMountPoint checks if the given path is mountpoint or not.
 func IsMountPoint(p string) (bool, error) {
 	dummyMount := mount.New("")
 	notMnt, err := dummyMount.IsLikelyNotMountPoint(p)
@@ -294,7 +294,7 @@ func IsMountPoint(p string) (bool, error) {
 	return !notMnt, nil
 }
 
-// Mount mounts the source to target path
+// Mount mounts the source to target path.
 func Mount(source, target, fstype string, options []string) error {
 	dummyMount := mount.New("")
 	return dummyMount.Mount(source, target, fstype, options)

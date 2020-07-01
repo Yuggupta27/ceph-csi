@@ -17,7 +17,7 @@ limitations under the License.
 package cephfs
 
 // ErrInvalidVolID is returned when a CSI passed VolumeID is not conformant to any known volume ID
-// formats
+// formats.
 type ErrInvalidVolID struct {
 	err error
 }
@@ -27,7 +27,7 @@ func (e ErrInvalidVolID) Error() string {
 }
 
 // ErrNonStaticVolume is returned when a volume is detected as not being
-// statically provisioned
+// statically provisioned.
 type ErrNonStaticVolume struct {
 	err error
 }
@@ -36,7 +36,7 @@ func (e ErrNonStaticVolume) Error() string {
 	return e.err.Error()
 }
 
-// ErrVolumeNotFound is returned when a subvolume is not found in CephFS
+// ErrVolumeNotFound is returned when a subvolume is not found in CephFS.
 type ErrVolumeNotFound struct {
 	err error
 }

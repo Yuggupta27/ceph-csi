@@ -52,7 +52,7 @@ const (
 )
 
 // EncryptionKMS provides external Key Management System for encryption
-// passphrases storage
+// passphrases storage.
 type EncryptionKMS interface {
 	GetPassphrase(key string) (string, error)
 	SavePassphrase(key, value string) error
@@ -60,12 +60,12 @@ type EncryptionKMS interface {
 	GetID() string
 }
 
-// MissingPassphrase is an error instructing to generate new passphrase
+// MissingPassphrase is an error instructing to generate new passphrase.
 type MissingPassphrase struct {
 	error
 }
 
-// SecretsKMS is default KMS implementation that means no KMS is in use
+// SecretsKMS is default KMS implementation that means no KMS is in use.
 type SecretsKMS struct {
 	passphrase string
 }
@@ -78,28 +78,28 @@ func initSecretsKMS(secrets map[string]string) (EncryptionKMS, error) {
 	return SecretsKMS{passphrase: passphraseValue}, nil
 }
 
-// GetPassphrase returns passphrase from Kubernetes secrets
+// GetPassphrase returns passphrase from Kubernetes secrets.
 func (kms SecretsKMS) GetPassphrase(key string) (string, error) {
 	return kms.passphrase, nil
 }
 
-// SavePassphrase is not implemented
+// SavePassphrase is not implemented.
 func (kms SecretsKMS) SavePassphrase(key, value string) error {
 	return fmt.Errorf("save new passphrase is not implemented for Kubernetes secrets")
 }
 
 // DeletePassphrase is doing nothing as no new passphrases are saved with
-// SecretsKMS
+// SecretsKMS.
 func (kms SecretsKMS) DeletePassphrase(key string) error {
 	return nil
 }
 
-// GetID is returning ID representing default KMS `default`
+// GetID is returning ID representing default KMS `default`.
 func (kms SecretsKMS) GetID() string {
 	return defaultKMSType
 }
 
-// GetKMS returns an instance of Key Management System
+// GetKMS returns an instance of Key Management System.
 func GetKMS(kmsID string, secrets map[string]string) (EncryptionKMS, error) {
 	if kmsID == "" || kmsID == defaultKMSType {
 		return initSecretsKMS(secrets)
@@ -142,7 +142,7 @@ func GetKMS(kmsID string, secrets map[string]string) (EncryptionKMS, error) {
 	return nil, fmt.Errorf("unknown encryption KMS type %s", kmsType)
 }
 
-// GetCryptoPassphrase Retrieves passphrase to encrypt volume
+// GetCryptoPassphrase Retrieves passphrase to encrypt volume.
 func GetCryptoPassphrase(ctx context.Context, volumeID string, kms EncryptionKMS) (string, error) {
 	passphrase, err := kms.GetPassphrase(volumeID)
 	if err == nil {
@@ -165,7 +165,7 @@ func GetCryptoPassphrase(ctx context.Context, volumeID string, kms EncryptionKMS
 	return "", err
 }
 
-// generateNewEncryptionPassphrase generates a random passphrase for encryption
+// generateNewEncryptionPassphrase generates a random passphrase for encryption.
 func generateNewEncryptionPassphrase() (string, error) {
 	bytesPassphrase := make([]byte, encryptionPassphraseSize)
 	_, err := rand.Read(bytesPassphrase)
@@ -175,14 +175,14 @@ func generateNewEncryptionPassphrase() (string, error) {
 	return base64.URLEncoding.EncodeToString(bytesPassphrase), nil
 }
 
-// VolumeMapper returns file name and it's path to where encrypted device should be open
+// VolumeMapper returns file name and it's path to where encrypted device should be open.
 func VolumeMapper(volumeID string) (mapperFile, mapperFilePath string) {
 	mapperFile = mapperFilePrefix + volumeID
 	mapperFilePath = path.Join(mapperFilePathPrefix, mapperFile)
 	return mapperFile, mapperFilePath
 }
 
-// EncryptVolume encrypts provided device with LUKS
+// EncryptVolume encrypts provided device with LUKS.
 func EncryptVolume(ctx context.Context, devicePath, passphrase string) error {
 	klog.V(4).Infof(Log(ctx, "Encrypting device %s with LUKS"), devicePath)
 	if _, _, err := LuksFormat(devicePath, passphrase); err != nil {
@@ -191,21 +191,21 @@ func EncryptVolume(ctx context.Context, devicePath, passphrase string) error {
 	return nil
 }
 
-// OpenEncryptedVolume opens volume so that it can be used by the client
+// OpenEncryptedVolume opens volume so that it can be used by the client.
 func OpenEncryptedVolume(ctx context.Context, devicePath, mapperFile, passphrase string) error {
 	klog.V(4).Infof(Log(ctx, "Opening device %s with LUKS on %s"), devicePath, mapperFile)
 	_, _, err := LuksOpen(devicePath, mapperFile, passphrase)
 	return err
 }
 
-// CloseEncryptedVolume closes encrypted volume so it can be detached
+// CloseEncryptedVolume closes encrypted volume so it can be detached.
 func CloseEncryptedVolume(ctx context.Context, mapperFile string) error {
 	klog.V(4).Infof(Log(ctx, "Closing LUKS device %s"), mapperFile)
 	_, _, err := LuksClose(mapperFile)
 	return err
 }
 
-// IsDeviceOpen determines if encrypted device is already open
+// IsDeviceOpen determines if encrypted device is already open.
 func IsDeviceOpen(ctx context.Context, device string) (bool, error) {
 	_, mappedFile, err := DeviceEncryptionStatus(ctx, device)
 	return (mappedFile != ""), err
