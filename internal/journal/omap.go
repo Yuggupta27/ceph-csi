@@ -18,11 +18,12 @@ package journal
 
 import (
 	"context"
+	"errors"
+
+	"k8s.io/klog"
 
 	"github.com/ceph/ceph-csi/internal/util"
-
 	"github.com/ceph/go-ceph/rados"
-	"k8s.io/klog"
 )
 
 // listExcess is the number of false-positive key-value pairs we will
@@ -147,7 +148,7 @@ func setOMapKeys(
 }
 
 func omapPoolError(poolName string, err error) error {
-	if err == rados.ErrNotFound {
+	if errors.Is(err, rados.ErrNotFound) {
 		return util.NewErrPoolNotFound(poolName, err)
 	}
 	return err
