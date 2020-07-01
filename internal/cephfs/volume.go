@@ -214,11 +214,11 @@ func mountCephRoot(ctx context.Context, volID volumeID, volOptions *volumeOption
 
 	m, err := newMounter(volOptions)
 	if err != nil {
-		return fmt.Errorf("failed to create mounter: %v", err)
+		return fmt.Errorf("failed to create mounter: %w", err)
 	}
 
 	if err = m.mount(ctx, cephRoot, adminCr, volOptions); err != nil {
-		return fmt.Errorf("error mounting ceph root: %v", err)
+		return fmt.Errorf("error mounting ceph root: %w", err)
 	}
 
 	return nil

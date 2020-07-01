@@ -335,7 +335,7 @@ func newVolumeOptionsFromVersion1Context(volID string, options, secrets map[stri
 	}
 
 	if opts.ProvisionVolume, err = strconv.ParseBool(provisionVolumeBool); err != nil {
-		return nil, nil, fmt.Errorf("failed to parse provisionVolume: %v", err)
+		return nil, nil, fmt.Errorf("failed to parse provisionVolume: %w", err)
 	}
 
 	if opts.ProvisionVolume {
@@ -377,7 +377,7 @@ func newVolumeOptionsFromStaticVolume(volID string, options map[string]string) (
 	}
 
 	if staticVol, err = strconv.ParseBool(val); err != nil {
-		return nil, nil, fmt.Errorf("failed to parse preProvisionedVolume: %v", err)
+		return nil, nil, fmt.Errorf("failed to parse preProvisionedVolume: %w", err)
 	}
 
 	if !staticVol {
