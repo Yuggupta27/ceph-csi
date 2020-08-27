@@ -1358,3 +1358,33 @@ func rbdOptions(pool string) string {
 	}
 	return "--pool=" + pool
 }
+
+// getMountPath fetches the path on an app where volume is mounted.
+func getMountPath(app *v1.Pod) string {
+	// var err error
+	path := app.Spec.Containers[0].VolumeMounts[0].MountPath
+	// filePath := filepath.Join(path, fileName)
+	// check if file exists on the path
+	// if _, err = os.Stat(filePath); err == nil {
+	// 	return filePath, nil
+	// }
+	// return "", err
+	return path
+}
+
+// calculateMd5Sum returns the md5sum of a file inside a pod.
+func calculateMd5Sum(f *framework.Framework, app *v1.Pod, filePath string, opt *metav1.ListOptions) (string, error) {
+	cmd := fmt.Sprintf("md5sum %s", filePath)
+	md5sumCmdOut, stdErr := execCommandInPod(f, cmd, app.Namespace, opt)
+	// Expect(stdErr).Should(BeEmpty())
+	if stdErr != "" {
+		return "", fmt.Errorf("error: md5sum could not be calculated %s", md5sumCmdOut)
+	}
+	// Expect(stdErr).Should(BeEmpty())
+	checkSum := strings.Split(md5sumCmdOut, "")[0]
+	e2elog.Logf("Calculated checksum  %s", checkSum)
+	return checkSum, nil
+}
+
+// cmd = f"yum install {packages} -y"
+//         self.exec_cmd_on_pod(cmd, out_yaml_format=False)
