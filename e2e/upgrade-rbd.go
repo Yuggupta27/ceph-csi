@@ -2,7 +2,10 @@ package e2e
 
 import (
 	"context"
+	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 
 	. "github.com/onsi/ginkgo" // nolint
 	v1 "k8s.io/api/core/v1"
@@ -21,6 +24,8 @@ var _ = Describe("RBD Upgrade Testing", func() {
 		c   clientset.Interface
 		pvc *v1.PersistentVolumeClaim
 		app *v1.Pod
+		// checkSum stores the md5sum of a file to verify uniqueness.
+		checkSum string
 	)
 
 	// deploy rbd CSI
@@ -126,6 +131,43 @@ var _ = Describe("RBD Upgrade Testing", func() {
 				if err != nil {
 					Fail(err.Error())
 				}
+				opt := metav1.ListOptions{
+					LabelSelector: "app=upgrade-testing",
+				}
+				// fetch the path where volume is mounted.
+				mountPath := getMountPath(app)
+				filePath := filepath.Join(mountPath, "testClone")
+
+				// create a test file at the mountPath.
+				cmd := fmt.Sprintf("touch %s", filePath)
+				_, stdErr := execCommandInPod(f, cmd, app.Namespace, &opt)
+				if stdErr != "" {
+					e2elog.Logf("failed to create file %s", stdErr)
+				}
+
+				opt = metav1.ListOptions{
+					LabelSelector: "app=upgrade-testing",
+				}
+				e2elog.Logf("Calculating checksum of %s", filePath)
+				checkSum, err = calculateMd5Sum(f, app, filePath, &opt)
+				if err != nil {
+					Fail(err.Error())
+				}
+
+				// Create snapshot of the pvc
+				snapshotPath := rbdExamplePath + "snapshot.yaml"
+				createRBDSnapshotClass(f)
+				snap := getSnapshot(snapshotPath)
+				snap.Name = "rbd-pvc-snapshot"
+				snap.Namespace = f.UniqueName
+				snap.Spec.Source.PersistentVolumeClaimName = &pvc.Name
+				// var s v1beta1.VolumeSnapshot
+				err = createSnapshot(&snap, deployTimeout)
+				if err != nil {
+					e2elog.Logf("failed to create snapshot %v", err)
+					Fail(err.Error())
+				}
+
 				err = deletePod(app.Name, app.Namespace, f.ClientSet, deployTimeout)
 				if err != nil {
 					Fail(err.Error())
@@ -144,6 +186,118 @@ var _ = Describe("RBD Upgrade Testing", func() {
 				err = createApp(f.ClientSet, app, deployTimeout)
 				if err != nil {
 					Fail(err.Error())
+				}
+			})
+
+			By("Create clone from a snapshot", func() {
+				pvcSize := "2Gi"
+				pvcClonePath := rbdExamplePath + "pvc-restore.yaml"
+				// pvcSmartClonePath := rbdExamplePath + "pvc-clone.yaml"
+				appClonePath := rbdExamplePath + "pod-restore.yaml"
+				v, err := f.ClientSet.Discovery().ServerVersion()
+				if err != nil {
+					e2elog.Logf("failed to get server version with error %v", err)
+					Fail(err.Error())
+				}
+				// pvc clone is only supported from v1.16+
+				if v.Major > "1" || (v.Major == "1" && v.Minor >= "16") {
+					pvcClone, err := loadPVC(pvcClonePath)
+					if err != nil {
+						Fail(err.Error())
+					}
+					pvcClone.Namespace = f.UniqueName
+					pvcClone.Spec.Resources.Requests[v1.ResourceStorage] = resource.MustParse(pvcSize)
+					pvcClone.Spec.DataSource.Name = "rbd-pvc-snapshot"
+					appClone, err := loadApp(appClonePath)
+					if err != nil {
+						Fail(err.Error())
+					}
+					appClone.Namespace = f.UniqueName
+					appClone.Name = "app-clone-from-snap"
+					appClone.Labels = map[string]string{"app": "validate-snap-clone"}
+					err = createPVCAndApp("", f, pvcClone, appClone, deployTimeout)
+					if err != nil {
+						Fail(err.Error())
+					}
+					opt := metav1.ListOptions{
+						LabelSelector: "app=validate-snap-clone",
+					}
+					e2elog.Logf("Calculating mountPath")
+					mountPath := getMountPath(appClone)
+					e2elog.Logf("Calculating testFilePath")
+					testFilePath := filepath.Join(mountPath, "testClone")
+					e2elog.Logf("Calculating newCheckSum")
+					newCheckSum, err := calculateMd5Sum(f, appClone, testFilePath, &opt)
+					if err != nil {
+						Fail(err.Error())
+					}
+
+					if !strings.Contains(newCheckSum, checkSum) {
+						e2elog.Logf("The md5sum of files did not match, expected %s received %s  ", checkSum, newCheckSum)
+						Fail(err.Error())
+					}
+					e2elog.Logf("The md5sum of files matched")
+
+					// delete cloned pvc and pod
+					err = deletePVCAndApp("", f, pvcClone, appClone)
+					if err != nil {
+						Fail(err.Error())
+					}
+
+				}
+			})
+
+			By("Create clone from existing PVC", func() {
+				pvcSize := "2Gi"
+				pvcSmartClonePath := rbdExamplePath + "pvc-clone.yaml"
+				appSmartClonePath := rbdExamplePath + "pod-clone.yaml"
+				v, err := f.ClientSet.Discovery().ServerVersion()
+				if err != nil {
+					e2elog.Logf("failed to get server version with error %v", err)
+					Fail(err.Error())
+				}
+				// pvc clone is only supported from v1.16+
+				if v.Major > "1" || (v.Major == "1" && v.Minor >= "16") {
+					pvcClone, err := loadPVC(pvcSmartClonePath)
+					if err != nil {
+						Fail(err.Error())
+					}
+					pvcClone.Spec.DataSource.Name = pvc.Name
+					pvcClone.Namespace = f.UniqueName
+					pvcClone.Spec.Resources.Requests[v1.ResourceStorage] = resource.MustParse(pvcSize)
+					appClone, err := loadApp(appSmartClonePath)
+					if err != nil {
+						Fail(err.Error())
+					}
+					appClone.Namespace = f.UniqueName
+					appClone.Name = "appclone"
+					appClone.Labels = map[string]string{"app": "validate-clone"}
+					err = createPVCAndApp("", f, pvcClone, appClone, deployTimeout)
+					if err != nil {
+						Fail(err.Error())
+					}
+					opt := metav1.ListOptions{
+						LabelSelector: "app=validate-clone",
+					}
+					mountPath := getMountPath(appClone)
+					testFilePath := filepath.Join(mountPath, "testClone")
+					newCheckSum, err := calculateMd5Sum(f, appClone, testFilePath, &opt)
+					if err != nil {
+						Fail(err.Error())
+					}
+
+					if !strings.Contains(newCheckSum, checkSum) {
+						e2elog.Logf("The md5sum of files did not match, expected %s received %s  ", checkSum, newCheckSum)
+						Fail(err.Error())
+					}
+					e2elog.Logf("The md5sum of files matched")
+
+					// delete cloned pvc and pod
+					err = deletePVCAndApp("", f, pvcClone, appClone)
+					if err != nil {
+						Fail(err.Error())
+					}
+
 				}
 			})
 
