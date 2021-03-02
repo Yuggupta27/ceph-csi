@@ -644,7 +644,7 @@ func (rv *rbdVolume) checkImageChainHasFeature(ctx context.Context, feature uint
 		vol.ioctx.Destroy()
 		vol.ioctx = nil
 		if err != nil {
-			util.ErrorLog(ctx, "failed to get image info for %s: %s", vol, err)
+			util.ErrorLog(ctx, "failed to get image info for %s: %s", vol.String(), err)
 			return false, err
 		}
 		if f := vol.hasFeature(feature); f {
