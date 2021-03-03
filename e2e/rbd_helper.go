@@ -555,9 +555,19 @@ func deletePool(name string, cephfs bool, f *framework.Framework) error {
 }
 
 func createPool(f *framework.Framework, name string) error {
+	var (
+		pgCount = 128
+		size    = 1
+	)
 	// ceph osd pool create replicapool
-	cmd := fmt.Sprintf("ceph osd pool create %s", name)
+	cmd := fmt.Sprintf("ceph osd pool create %s %d", name, pgCount)
 	_, _, err := execCommandInToolBoxPod(f, cmd, rookNamespace)
+	if err != nil {
+		return err
+	}
+	// ceph osd pool set replicapool size 1
+	cmd = fmt.Sprintf("ceph osd pool set %s size %d", name, size)
+	_, _, err = execCommandInToolBoxPod(f, cmd, rookNamespace)
 	return err
 }
 
