@@ -813,7 +813,7 @@ var _ = Describe("RBD", func() {
 				validateRBDImageCount(f, 1, defaultRBDPool)
 				// list RBD images and check if one of them has the same prefix
 				foundIt := false
-				images, err := listRBDImages(f)
+				images, err := listRBDImages(f, defaultRBDPool)
 				if err != nil {
 					e2elog.Failf("failed to list rbd images with error %v", err)
 				}
