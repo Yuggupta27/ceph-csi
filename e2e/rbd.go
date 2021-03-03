@@ -127,8 +127,8 @@ func createORDeleteRbdResouces(action string) {
 	}
 }
 
-func validateRBDImageCount(f *framework.Framework, count int) {
-	imageList, err := listRBDImages(f)
+func validateRBDImageCount(f *framework.Framework, count int, pool string) {
+	imageList, err := listRBDImages(f, pool)
 	if err != nil {
 		e2elog.Failf("failed to list rbd images with error %v", err)
 	}
@@ -288,7 +288,7 @@ var _ = Describe("RBD", func() {
 					e2elog.Failf("failed to validate owner of pvc with error %v", err)
 				}
 				// validate created backend rbd images
-				validateRBDImageCount(f, 0)
+				validateRBDImageCount(f, 0, defaultRBDPool)
 			})
 
 			By("create a PVC and bind it to an app", func() {
@@ -297,7 +297,7 @@ var _ = Describe("RBD", func() {
 					e2elog.Failf("failed to validate pvc and application binding with error %v", err)
 				}
 				// validate created backend rbd images
-				validateRBDImageCount(f, 0)
+				validateRBDImageCount(f, 0, defaultRBDPool)
 			})
 
 			By("create a PVC and bind it to an app with normal user", func() {
@@ -306,7 +306,7 @@ var _ = Describe("RBD", func() {
 					e2elog.Failf("failed to validate normal user pvc and application binding with error %v", err)
 				}
 				// validate created backend rbd images
-				validateRBDImageCount(f, 0)
+				validateRBDImageCount(f, 0, defaultRBDPool)
 			})
 
 			By("create a PVC and bind it to an app with ext4 as the FS ", func() {
@@ -323,7 +323,7 @@ var _ = Describe("RBD", func() {
 					e2elog.Failf("failed to validate pvc and application binding with error %v", err)
 				}
 				// validate created backend rbd images
-				validateRBDImageCount(f, 0)
+				validateRBDImageCount(f, 0, defaultRBDPool)
 				err = deleteResource(rbdExamplePath + "storageclass.yaml")
 				if err != nil {
 					e2elog.Failf("failed to delete storageclass with error %v", err)
@@ -348,7 +348,7 @@ var _ = Describe("RBD", func() {
 					e2elog.Failf("failed to validate encrypted pvc with error %v", err)
 				}
 				// validate created backend rbd images
-				validateRBDImageCount(f, 0)
+				validateRBDImageCount(f, 0, defaultRBDPool)
 				err = deleteResource(rbdExamplePath + "storageclass.yaml")
 				if err != nil {
 					e2elog.Failf("failed to delete storageclass with error %v", err)
@@ -377,7 +377,7 @@ var _ = Describe("RBD", func() {
 					e2elog.Failf("failed to validate encrypted pvc with error %v", err)
 				}
 				// validate created backend rbd images
-				validateRBDImageCount(f, 0)
+				validateRBDImageCount(f, 0, defaultRBDPool)
 				err = deleteResource(rbdExamplePath + "storageclass.yaml")
 				if err != nil {
 					e2elog.Failf("failed to delete storageclass with error %v", err)
@@ -420,7 +420,7 @@ var _ = Describe("RBD", func() {
 					e2elog.Failf("failed to validate encrypted pvc with error %v", err)
 				}
 				// validate created backend rbd images
-				validateRBDImageCount(f, 0)
+				validateRBDImageCount(f, 0, defaultRBDPool)
 
 				// delete the Secret of the Tenant
 				err = c.CoreV1().Secrets(tenant).Delete(context.TODO(), token.Name, metav1.DeleteOptions{})
@@ -459,7 +459,7 @@ var _ = Describe("RBD", func() {
 					if err != nil {
 						e2elog.Failf("failed to create PVC with error %v", err)
 					}
-					validateRBDImageCount(f, 1)
+					validateRBDImageCount(f, 1, defaultRBDPool)
 					snap := getSnapshot(snapshotPath)
 					snap.Namespace = f.UniqueName
 					snap.Spec.Source.PersistentVolumeClaimName = &pvc.Name
@@ -486,7 +486,7 @@ var _ = Describe("RBD", func() {
 					}
 
 					// total images in cluster is 1 parent rbd image+ total snaps
-					validateRBDImageCount(f, totalCount+1)
+					validateRBDImageCount(f, totalCount+1, defaultRBDPool)
 					pvcClone, err := loadPVC(pvcClonePath)
 					if err != nil {
 						e2elog.Failf("failed to load PVC with error %v", err)
@@ -524,7 +524,7 @@ var _ = Describe("RBD", func() {
 					// total images in cluster is 1 parent rbd image+ total
 					// snaps+ total clones
 					totalCloneCount := totalCount + totalCount + 1
-					validateRBDImageCount(f, totalCloneCount)
+					validateRBDImageCount(f, totalCloneCount, defaultRBDPool)
 					wg.Add(totalCount)
 					// delete clone and app
 					for i := 0; i < totalCount; i++ {
@@ -550,7 +550,7 @@ var _ = Describe("RBD", func() {
 
 					// total images in cluster is 1 parent rbd image+ total
 					// snaps
-					validateRBDImageCount(f, totalCount+1)
+					validateRBDImageCount(f, totalCount+1, defaultRBDPool)
 					// create clones from different snapshosts and bind it to an
 					// app
 					wg.Add(totalCount)
@@ -578,7 +578,7 @@ var _ = Describe("RBD", func() {
 					// total images in cluster is 1 parent rbd image+ total
 					// snaps+ total clones
 					totalCloneCount = totalCount + totalCount + 1
-					validateRBDImageCount(f, totalCloneCount)
+					validateRBDImageCount(f, totalCloneCount, defaultRBDPool)
 					// delete parent pvc
 					err = deletePVCAndValidatePV(f.ClientSet, pvc, deployTimeout)
 					if err != nil {
@@ -587,7 +587,7 @@ var _ = Describe("RBD", func() {
 
 					// total images in cluster is total snaps+ total clones
 					totalSnapCount := totalCount + totalCount
-					validateRBDImageCount(f, totalSnapCount)
+					validateRBDImageCount(f, totalSnapCount, defaultRBDPool)
 					wg.Add(totalCount)
 					// delete snapshot
 					for i := 0; i < totalCount; i++ {
@@ -610,7 +610,7 @@ var _ = Describe("RBD", func() {
 						e2elog.Failf("deleting snapshots failed, %d errors were logged", failed)
 					}
 
-					validateRBDImageCount(f, totalCount)
+					validateRBDImageCount(f, totalCount, defaultRBDPool)
 					wg.Add(totalCount)
 					// delete clone and app
 					for i := 0; i < totalCount; i++ {
@@ -635,7 +635,7 @@ var _ = Describe("RBD", func() {
 					}
 
 					// validate created backend rbd images
-					validateRBDImageCount(f, 0)
+					validateRBDImageCount(f, 0, defaultRBDPool)
 				}
 			})
 
@@ -686,7 +686,7 @@ var _ = Describe("RBD", func() {
 
 				}
 				// validate created backend rbd images
-				validateRBDImageCount(f, totalCount)
+				validateRBDImageCount(f, totalCount, defaultRBDPool)
 				// delete PVC and app
 				for i := 0; i < totalCount; i++ {
 					name := fmt.Sprintf("%s%d", f.UniqueName, i)
@@ -698,7 +698,7 @@ var _ = Describe("RBD", func() {
 				}
 
 				// validate created backend rbd images
-				validateRBDImageCount(f, 0)
+				validateRBDImageCount(f, 0, defaultRBDPool)
 			})
 
 			By("check data persist after recreating pod", func() {
@@ -707,7 +707,7 @@ var _ = Describe("RBD", func() {
 					e2elog.Failf("failed to check data persist with error %v", err)
 				}
 				// validate created backend rbd images
-				validateRBDImageCount(f, 0)
+				validateRBDImageCount(f, 0, defaultRBDPool)
 			})
 
 			By("Resize Filesystem PVC and check application directory size", func() {
@@ -732,7 +732,7 @@ var _ = Describe("RBD", func() {
 
 					}
 					// validate created backend rbd images
-					validateRBDImageCount(f, 0)
+					validateRBDImageCount(f, 0, defaultRBDPool)
 				}
 			})
 
@@ -744,7 +744,7 @@ var _ = Describe("RBD", func() {
 						e2elog.Failf("failed to resize block PVC with error %v", err)
 					}
 					// validate created backend rbd images
-					validateRBDImageCount(f, 0)
+					validateRBDImageCount(f, 0, defaultRBDPool)
 				}
 			})
 
@@ -766,7 +766,7 @@ var _ = Describe("RBD", func() {
 				}
 
 				// validate created backend rbd images
-				validateRBDImageCount(f, 1)
+				validateRBDImageCount(f, 1, defaultRBDPool)
 				// delete rbd nodeplugin pods
 				err = deletePodWithLabel("app=csi-rbdplugin", cephCSINamespace, false)
 				if err != nil {
@@ -783,7 +783,7 @@ var _ = Describe("RBD", func() {
 					e2elog.Failf("failed to delete PVC and application with error %v", err)
 				}
 				// validate created backend rbd images
-				validateRBDImageCount(f, 0)
+				validateRBDImageCount(f, 0, defaultRBDPool)
 			})
 
 			By("create PVC in storageClass with volumeNamePrefix", func() {
@@ -808,7 +808,7 @@ var _ = Describe("RBD", func() {
 				}
 
 				// validate created backend rbd images
-				validateRBDImageCount(f, 1)
+				validateRBDImageCount(f, 1, defaultRBDPool)
 				// list RBD images and check if one of them has the same prefix
 				foundIt := false
 				images, err := listRBDImages(f)
@@ -829,7 +829,7 @@ var _ = Describe("RBD", func() {
 					e2elog.Failf("failed to  delete PVC with error %v", err)
 				}
 				// validate created backend rbd images
-				validateRBDImageCount(f, 0)
+				validateRBDImageCount(f, 0, defaultRBDPool)
 
 				err = deleteResource(rbdExamplePath + "storageclass.yaml")
 				if err != nil {
@@ -850,7 +850,7 @@ var _ = Describe("RBD", func() {
 					e2elog.Failf("failed to validate rbd static pv with error %v", err)
 				}
 				// validate created backend rbd images
-				validateRBDImageCount(f, 0)
+				validateRBDImageCount(f, 0, defaultRBDPool)
 			})
 
 			By("validate RBD static Block PVC", func() {
@@ -859,7 +859,7 @@ var _ = Describe("RBD", func() {
 					e2elog.Failf("failed to validate rbd block pv with error %v", err)
 				}
 				// validate created backend rbd images
-				validateRBDImageCount(f, 0)
+				validateRBDImageCount(f, 0, defaultRBDPool)
 			})
 
 			By("validate mount options in app pod", func() {
@@ -869,7 +869,7 @@ var _ = Describe("RBD", func() {
 					e2elog.Failf("failed to check mount options with error %v", err)
 				}
 				// validate created backend rbd images
-				validateRBDImageCount(f, 0)
+				validateRBDImageCount(f, 0, defaultRBDPool)
 			})
 
 			By("creating an app with a PVC, using a topology constrained StorageClass", func() {
@@ -1010,7 +1010,7 @@ var _ = Describe("RBD", func() {
 					e2elog.Failf("failed to create PVC with error %v", err)
 				}
 				// validate created backend rbd images
-				validateRBDImageCount(f, 1)
+				validateRBDImageCount(f, 1, defaultRBDPool)
 
 				// create an app and wait for 1 min for it to go to running state
 				err = createApp(f.ClientSet, app, 1)
@@ -1023,7 +1023,7 @@ var _ = Describe("RBD", func() {
 				}
 
 				// validate created backend rbd images
-				validateRBDImageCount(f, 0)
+				validateRBDImageCount(f, 0, defaultRBDPool)
 				err = deleteResource(rbdExamplePath + "storageclass.yaml")
 				if err != nil {
 					e2elog.Failf("failed to delete storageclass with error %v", err)
@@ -1054,7 +1054,7 @@ var _ = Describe("RBD", func() {
 						e2elog.Failf("failed to create PVC and application with error %v", err)
 					}
 					// validate created backend rbd images
-					validateRBDImageCount(f, 1)
+					validateRBDImageCount(f, 1, defaultRBDPool)
 					// delete pod as we should not create snapshot for in-use pvc
 					err = deletePod(app.Name, app.Namespace, f.ClientSet, deployTimeout)
 					if err != nil {
@@ -1072,7 +1072,7 @@ var _ = Describe("RBD", func() {
 					// validate created backend rbd images
 					// parent PVC + snapshot
 					totalImages := 2
-					validateRBDImageCount(f, totalImages)
+					validateRBDImageCount(f, totalImages, defaultRBDPool)
 					pvcClone, err := loadPVC(pvcClonePath)
 					if err != nil {
 						e2elog.Failf("failed to load PVC with error %v", err)
@@ -1088,7 +1088,7 @@ var _ = Describe("RBD", func() {
 					// validate created backend rbd images
 					// parent pvc+ snapshot + clone
 					totalImages = 3
-					validateRBDImageCount(f, totalImages)
+					validateRBDImageCount(f, totalImages, defaultRBDPool)
 
 					appClone, err := loadApp(appClonePath)
 					if err != nil {
@@ -1152,7 +1152,7 @@ var _ = Describe("RBD", func() {
 						e2elog.Failf("failed to delete PVC with error %v", err)
 					}
 					// validate created backend rbd images
-					validateRBDImageCount(f, 0)
+					validateRBDImageCount(f, 0, defaultRBDPool)
 				}
 			})
 
@@ -1231,7 +1231,7 @@ var _ = Describe("RBD", func() {
 					e2elog.Failf("failed to validate owner of pvc with error %v", err)
 				}
 				// validate created backend rbd images
-				validateRBDImageCount(f, 0)
+				validateRBDImageCount(f, 0, defaultRBDPool)
 
 				// Create a PVC and bind it to an app within the namesapce
 				err = validatePVCAndAppBinding(pvcPath, appPath, f)
@@ -1272,7 +1272,7 @@ var _ = Describe("RBD", func() {
 						e2elog.Failf("failed to create PVC with error %v", err)
 					}
 					// validate created backend rbd images
-					validateRBDImageCount(f, 1)
+					validateRBDImageCount(f, 1, defaultRBDPool)
 
 					snap := getSnapshot(snapshotPath)
 					snap.Namespace = f.UniqueName
@@ -1281,7 +1281,7 @@ var _ = Describe("RBD", func() {
 					if err != nil {
 						e2elog.Failf("failed to create snapshot with error %v", err)
 					}
-					validateRBDImageCount(f, 2)
+					validateRBDImageCount(f, 2, defaultRBDPool)
 
 					err = validatePVCAndAppBinding(pvcClonePath, appClonePath, f)
 					if err != nil {
@@ -1292,13 +1292,13 @@ var _ = Describe("RBD", func() {
 						e2elog.Failf("failed to delete snapshot with error %v", err)
 					}
 					// as snapshot is deleted the image count should be one
-					validateRBDImageCount(f, 1)
+					validateRBDImageCount(f, 1, defaultRBDPool)
 
 					err = deletePVCAndValidatePV(f.ClientSet, pvc, deployTimeout)
 					if err != nil {
 						e2elog.Failf("failed to delete PVC with error %v", err)
 					}
-					validateRBDImageCount(f, 0)
+					validateRBDImageCount(f, 0, defaultRBDPool)
 				}
 
 				// delete RBD provisioner secret
@@ -1356,7 +1356,7 @@ var _ = Describe("RBD", func() {
 					e2elog.Failf("failed to create PVC and application with error %v", err)
 				}
 				// validate created backend rbd images
-				validateRBDImageCount(f, 1)
+				validateRBDImageCount(f, 1, defaultRBDPool)
 
 				opt := metav1.ListOptions{
 					LabelSelector: fmt.Sprintf("app=%s", app.Name),
@@ -1375,7 +1375,7 @@ var _ = Describe("RBD", func() {
 					e2elog.Failf("failed to delete PVC and application with error %v", err)
 				}
 				// validate created backend rbd images
-				validateRBDImageCount(f, 0)
+				validateRBDImageCount(f, 0, defaultRBDPool)
 			})
 
 			By("create a thick-provisioned PVC", func() {
@@ -1399,7 +1399,7 @@ var _ = Describe("RBD", func() {
 				if err != nil {
 					e2elog.Failf("failed to create PVC with error %v", err)
 				}
-				validateRBDImageCount(f, 1)
+				validateRBDImageCount(f, 1, defaultRBDPool)
 
 				// nothing has been written, but the image should be allocated
 				du, err := getRbdDu(f, pvc)
@@ -1443,7 +1443,7 @@ var _ = Describe("RBD", func() {
 				if err != nil {
 					e2elog.Failf("failed to delete PVC with error: %v", err)
 				}
-				validateRBDImageCount(f, 0)
+				validateRBDImageCount(f, 0, defaultRBDPool)
 
 				err = deleteResource(rbdExamplePath + "storageclass.yaml")
 				if err != nil {
@@ -1490,7 +1490,7 @@ var _ = Describe("RBD", func() {
 					e2elog.Failf("failed to validate controller with error %v", err)
 				}
 				// validate created backend rbd images
-				validateRBDImageCount(f, 0)
+				validateRBDImageCount(f, 0, defaultRBDPool)
 				err = createRBDStorageClass(f.ClientSet, f, nil, nil, deletePolicy)
 				if err != nil {
 					e2elog.Failf("failed to create storageclass with error %v", err)

@@ -486,7 +486,7 @@ func validatePVCClone(sourcePvcPath, clonePvcPath, clonePvcAppPath string, f *fr
 		e2elog.Failf("failed to create PVC with error %v", err)
 	}
 	// validate created backend rbd images
-	validateRBDImageCount(f, 1)
+	validateRBDImageCount(f, 1, defaultRBDPool)
 	pvcClone, err := loadPVC(clonePvcPath)
 	if err != nil {
 		e2elog.Failf("failed to load PVC with error %v", err)
@@ -524,7 +524,7 @@ func validatePVCClone(sourcePvcPath, clonePvcPath, clonePvcAppPath string, f *fr
 	// total images in cluster is 1 parent rbd image+ total
 	// temporary clone+ total clones
 	totalCloneCount := totalCount + totalCount + 1
-	validateRBDImageCount(f, totalCloneCount)
+	validateRBDImageCount(f, totalCloneCount, defaultRBDPool)
 	// delete parent pvc
 	err = deletePVCAndValidatePV(f.ClientSet, pvc, deployTimeout)
 	if err != nil {
@@ -532,7 +532,7 @@ func validatePVCClone(sourcePvcPath, clonePvcPath, clonePvcAppPath string, f *fr
 	}
 
 	totalCloneCount = totalCount + totalCount
-	validateRBDImageCount(f, totalCloneCount)
+	validateRBDImageCount(f, totalCloneCount, defaultRBDPool)
 	wg.Add(totalCount)
 	// delete clone and app
 	for i := 0; i < totalCount; i++ {
@@ -556,7 +556,7 @@ func validatePVCClone(sourcePvcPath, clonePvcPath, clonePvcAppPath string, f *fr
 		e2elog.Failf("deleting PVCs and applications failed, %d errors were logged", failed)
 	}
 
-	validateRBDImageCount(f, 0)
+	validateRBDImageCount(f, 0, defaultRBDPool)
 }
 
 // validateController simulates the required operations to validate the
