@@ -37,6 +37,19 @@ var (
 	nodeCSIZoneLabel    = "topology.rbd.csi.ceph.com/zone"
 	rbdTopologyPool     = "newrbdpool"
 	rbdTopologyDataPool = "replicapool" // NOTE: should be different than rbdTopologyPool for test to be effective
+
+	// yaml files required for deployment
+	pvcPath                = rbdExamplePath + "pvc.yaml"
+	appPath                = rbdExamplePath + "pod.yaml"
+	rawPvcPath             = rbdExamplePath + "raw-block-pvc.yaml"
+	rawAppPath             = rbdExamplePath + "raw-block-pod.yaml"
+	pvcClonePath           = rbdExamplePath + "pvc-restore.yaml"
+	pvcSmartClonePath      = rbdExamplePath + "pvc-clone.yaml"
+	pvcBlockSmartClonePath = rbdExamplePath + "pvc-block-clone.yaml"
+	appClonePath           = rbdExamplePath + "pod-restore.yaml"
+	appSmartClonePath      = rbdExamplePath + "pod-clone.yaml"
+	appBlockSmartClonePath = rbdExamplePath + "block-pod-clone.yaml"
+	snapshotPath           = rbdExamplePath + "snapshot.yaml"
 )
 
 func deployRBDPlugin() {
@@ -256,17 +269,6 @@ var _ = Describe("RBD", func() {
 
 	Context("Test RBD CSI", func() {
 		It("Test RBD CSI", func() {
-			pvcPath := rbdExamplePath + "pvc.yaml"
-			appPath := rbdExamplePath + "pod.yaml"
-			rawPvcPath := rbdExamplePath + "raw-block-pvc.yaml"
-			rawAppPath := rbdExamplePath + "raw-block-pod.yaml"
-			pvcClonePath := rbdExamplePath + "pvc-restore.yaml"
-			pvcSmartClonePath := rbdExamplePath + "pvc-clone.yaml"
-			pvcBlockSmartClonePath := rbdExamplePath + "pvc-block-clone.yaml"
-			appClonePath := rbdExamplePath + "pod-restore.yaml"
-			appSmartClonePath := rbdExamplePath + "pod-clone.yaml"
-			appBlockSmartClonePath := rbdExamplePath + "block-pod-clone.yaml"
-			snapshotPath := rbdExamplePath + "snapshot.yaml"
 
 			By("checking provisioner deployment is running", func() {
 				err := waitForDeploymentComplete(rbdDeploymentName, cephCSINamespace, f.ClientSet, deployTimeout)
@@ -445,7 +447,7 @@ var _ = Describe("RBD", func() {
 					totalCount := 10
 					wgErrs := make([]error, totalCount)
 					wg.Add(totalCount)
-					err := createRBDSnapshotClass(f, nil))
+					err := createRBDSnapshotClass(f, nil)
 					if err != nil {
 						e2elog.Failf("failed to create storageclass with error %v", err)
 					}
